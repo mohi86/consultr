@@ -80,7 +80,7 @@ export function SignInModal({ open, onOpenChange }: SignInModalProps) {
         </p>
 
         <p className="text-center text-sm text-text-muted">
-          Valyu provides AI-powered deep research capabilities. Sign in to use your own credits for unlimited research.
+          Valyu powers this app. It provides AI-powered deep research capabilities. Sign in to enjoy all the goodies and I dare you to enjoy it.
         </p>
 
         {/* Error Message */}

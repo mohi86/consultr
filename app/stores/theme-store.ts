@@ -1,0 +1,62 @@
+import { create } from "zustand";
+
+type Theme = "light" | "dark";
+
+interface ThemeState {
+  theme: Theme;
+  setTheme: (theme: Theme) => void;
+  toggleTheme: () => void;
+  initialize: () => void;
+}
+
+function getSystemTheme(): Theme {
+  if (typeof window === "undefined") return "light";
+  return window.matchMedia("(prefers-color-scheme: dark)").matches
+    ? "dark"
+    : "light";
+}
+
+function getStoredTheme(): Theme | null {
+  if (typeof window === "undefined") return null;
+  const stored = localStorage.getItem("theme");
+  if (stored === "light" || stored === "dark") {
+    return stored;
+  }
+  return null;
+}
+
+function applyTheme(theme: Theme) {
+  if (typeof window === "undefined") return;
+  const root = document.documentElement;
+  if (theme === "dark") {
+    root.classList.add("dark");
+    root.classList.remove("light");
+  } else {
+    root.classList.add("light");
+    root.classList.remove("dark");
+  }
+  localStorage.setItem("theme", theme);
+}
+
+export const useThemeStore = create<ThemeState>((set, get) => ({
+  theme: "light",
+
+  initialize: () => {
+    const stored = getStoredTheme();
+    const theme = stored || getSystemTheme();
+    applyTheme(theme);
+    set({ theme });
+  },
+
+  setTheme: (theme: Theme) => {
+    applyTheme(theme);
+    set({ theme });
+  },
+
+  toggleTheme: () => {
+    const currentTheme = get().theme;
+    const newTheme = currentTheme === "light" ? "dark" : "light";
+    applyTheme(newTheme);
+    set({ theme: newTheme });
+  },
+}));

@@ -11,7 +11,8 @@ import {
   ChevronRight,
   Briefcase,
   HelpCircle,
-  Settings,
+  Sun,
+  Moon,
   BookOpen,
   History,
   Trash2,
@@ -20,6 +21,7 @@ import {
   Loader2,
   XCircle,
   Plus,
+  Lock,
 } from "lucide-react";
 import {
   getResearchHistory,
@@ -27,6 +29,10 @@ import {
   clearHistory,
   ResearchHistoryItem,
 } from "@/app/lib/researchHistory";
+import { useAuthStore } from "@/app/stores/auth-store";
+import { useThemeStore } from "@/app/stores/theme-store";
+
+const APP_MODE = process.env.NEXT_PUBLIC_APP_MODE || "self-hosted";
 
 interface SidebarProps {
   onSelectHistory?: (item: ResearchHistoryItem) => void;
@@ -37,7 +43,6 @@ interface SidebarProps {
 const bottomItems = [
   { icon: BookOpen, label: "Documentation" },
   { icon: HelpCircle, label: "Help & Support" },
-  { icon: Settings, label: "Settings" },
 ];
 
 export default function Sidebar({
@@ -47,6 +52,13 @@ export default function Sidebar({
 }: SidebarProps) {
   const [isCollapsed, setIsCollapsed] = useState(true);
   const [history, setHistory] = useState<ResearchHistoryItem[]>([]);
+
+  const { isAuthenticated, openSignInModal } = useAuthStore();
+  const { theme, toggleTheme } = useThemeStore();
+
+  // In Valyu mode, require auth to view history
+  const isValyuMode = APP_MODE === "valyu";
+  const canViewHistory = !isValyuMode || isAuthenticated;
 
   // Load history on mount and when localStorage changes
   useEffect(() => {
@@ -203,18 +215,43 @@ export default function Sidebar({
                 <Plus className="w-5 h-5" />
               </button>
               <button
-                onClick={() => setIsCollapsed(false)}
+                onClick={() => {
+                  if (canViewHistory) {
+                    setIsCollapsed(false);
+                  } else {
+                    openSignInModal();
+                  }
+                }}
                 className="w-full flex items-center justify-center p-3 rounded-lg hover:bg-surface-hover transition-colors text-text-muted"
-                title="Research History"
+                title={canViewHistory ? "Research History" : "Sign in to view history"}
               >
-                <History className="w-5 h-5" />
+                {canViewHistory ? (
+                  <History className="w-5 h-5" />
+                ) : (
+                  <Lock className="w-5 h-5" />
+                )}
               </button>
             </div>
           </nav>
         ) : (
           // History view
           <div className="flex flex-col h-full">
-            {history.length === 0 ? (
+            {!canViewHistory ? (
+              // Show sign-in prompt for Valyu mode without auth
+              <div className="flex-1 flex flex-col items-center justify-center p-4 text-center">
+                <Lock className="w-8 h-8 text-text-muted mb-2" />
+                <p className="text-sm text-text-muted">Sign in to view history</p>
+                <p className="text-xs text-text-muted mt-1">
+                  Your research history will be saved when signed in
+                </p>
+                <button
+                  onClick={openSignInModal}
+                  className="mt-4 px-4 py-2 bg-primary text-white text-sm rounded-lg hover:bg-primary/90 transition-colors"
+                >
+                  Sign in
+                </button>
+              </div>
+            ) : history.length === 0 ? (
               <div className="flex-1 flex flex-col items-center justify-center p-4 text-center">
                 <History className="w-8 h-8 text-text-muted mb-2" />
                 <p className="text-sm text-text-muted">No research history yet</p>
@@ -303,6 +340,23 @@ export default function Sidebar({
               </button>
             );
           })}
+          {/* Theme Toggle */}
+          <button
+            onClick={toggleTheme}
+            className="w-full flex items-center gap-3 p-3 rounded-lg hover:bg-surface-hover transition-colors text-text-muted text-left"
+            title={isCollapsed ? (theme === "light" ? "Switch to Dark Mode" : "Switch to Light Mode") : undefined}
+          >
+            {theme === "light" ? (
+              <Moon className="w-5 h-5 flex-shrink-0" />
+            ) : (
+              <Sun className="w-5 h-5 flex-shrink-0" />
+            )}
+            {!isCollapsed && (
+              <span className="text-sm truncate">
+                {theme === "light" ? "Dark Mode" : "Light Mode"}
+              </span>
+            )}
+          </button>
         </div>
       </div>
 

@@ -85,6 +85,7 @@ export default function ConsultingResearchForm({
   const [error, setError] = useState<string | null>(null);
 
   const getAccessToken = useAuthStore((state) => state.getAccessToken);
+  const openSignInModal = useAuthStore((state) => state.openSignInModal);
 
   const selectedType = researchTypes.find((t) => t.id === researchType)!;
 
@@ -132,6 +133,12 @@ export default function ConsultingResearchForm({
           // Response wasn't JSON, use status text
           errorMessage = response.statusText || errorMessage;
         }
+
+        // If 401, open sign-in modal
+        if (response.status === 401) {
+          openSignInModal();
+        }
+
         throw new Error(errorMessage);
       }
 

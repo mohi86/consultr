@@ -10,9 +10,8 @@ import { SignInModal } from "./sign-in-modal";
 const APP_MODE = process.env.NEXT_PUBLIC_APP_MODE || "self-hosted";
 
 export function SignInPanel() {
-  const { user, isAuthenticated, isLoading, signOut } = useAuthStore();
+  const { user, isAuthenticated, isLoading, signOut, showSignInModal, openSignInModal, closeSignInModal } = useAuthStore();
   const [showDropdown, setShowDropdown] = useState(false);
-  const [showSignInModal, setShowSignInModal] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -33,7 +32,7 @@ export function SignInPanel() {
     if (isAuthenticated) {
       setShowDropdown(!showDropdown);
     } else {
-      setShowSignInModal(true);
+      openSignInModal();
     }
   };
 
@@ -134,7 +133,7 @@ export function SignInPanel() {
         )}
       </div>
 
-      <SignInModal open={showSignInModal} onOpenChange={setShowSignInModal} />
+      <SignInModal open={showSignInModal} onOpenChange={(open) => open ? openSignInModal() : closeSignInModal()} />
     </>
   );
 }

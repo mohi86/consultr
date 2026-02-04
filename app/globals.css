@@ -37,8 +37,27 @@
   --font-mono: var(--font-geist-mono);
 }
 
+/* Dark mode - triggered by .dark class on html element */
+.dark {
+  --background: #0a0f1a;
+  --foreground: #f8f9fa;
+  --primary: #4a90d9;
+  --primary-light: #6ba3e0;
+  --primary-dark: #2d5a8a;
+  --accent: #e8c547;
+  --accent-light: #f0d76a;
+  --surface: #151c2c;
+  --surface-hover: #1f2937;
+  --border: #2d3748;
+  --text-muted: #9ca3af;
+  --success: #22c55e;
+  --warning: #eab308;
+  --error: #ef4444;
+}
+
+/* Also support system preference as fallback when no preference is set */
 @media (prefers-color-scheme: dark) {
-  :root {
+  :root:not(.light) {
     --background: #0a0f1a;
     --foreground: #f8f9fa;
     --primary: #4a90d9;

@@ -26,10 +26,13 @@ interface AuthState {
   isAuthenticated: boolean;
   isLoading: boolean;
   initialized: boolean;
+  showSignInModal: boolean;
   signIn: (user: User, tokens: { accessToken: string; refreshToken?: string; expiresIn?: number }) => void;
   signOut: () => void;
   initialize: () => void;
   getAccessToken: () => string | null;
+  openSignInModal: () => void;
+  closeSignInModal: () => void;
 }
 
 function saveTokens(tokens: TokenData): void {
@@ -102,6 +105,7 @@ export const useAuthStore = create<AuthState>()(
       isAuthenticated: false,
       isLoading: true,
       initialized: false,
+      showSignInModal: false,
 
       initialize: () => {
         if (get().initialized) return;
@@ -190,6 +194,14 @@ export const useAuthStore = create<AuthState>()(
         }
 
         return state.accessToken;
+      },
+
+      openSignInModal: () => {
+        set({ showSignInModal: true });
+      },
+
+      closeSignInModal: () => {
+        set({ showSignInModal: false });
       },
     }),
     {
