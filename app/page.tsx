@@ -54,9 +54,11 @@ export default function Home() {
   const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
   const [isVideoPlaying, setIsVideoPlaying] = useState(false);
   const [showIntro, setShowIntro] = useState(false);
+  const [introStarted, setIntroStarted] = useState(false);
 
   const cancelledRef = useRef(false);
   const pollIntervalRef = useRef<NodeJS.Timeout | null>(null);
+  const introVideoRef = useRef<HTMLVideoElement>(null);
   const getAccessToken = useAuthStore((state) => state.getAccessToken);
 
   const clearPolling = useCallback(() => {
@@ -256,9 +258,18 @@ export default function Home() {
     setShowIntro(true);
   }, []);
 
+  const handleIntroStart = () => {
+    setIntroStarted(true);
+    if (introVideoRef.current) {
+      introVideoRef.current.muted = false;
+      introVideoRef.current.play();
+    }
+  };
+
   const handleIntroEnd = () => {
     localStorage.setItem("consultralph_intro_seen", "true");
     setShowIntro(false);
+    setIntroStarted(false);
   };
 
   // Cleanup on unmount
@@ -277,25 +288,41 @@ export default function Home() {
         <div className="fixed inset-0 z-[100] bg-black flex items-center justify-center">
           <div className="relative w-full h-full flex items-center justify-center pb-24 md:pb-32">
             <video
+              ref={introVideoRef}
               src="/ralph.mp4"
-              autoPlay
-              muted
               playsInline
+              muted
               className="max-w-full max-h-full object-contain"
               onEnded={handleIntroEnd}
             />
-            {/* Subtitles */}
-            <div className="absolute bottom-8 left-1/2 transform -translate-x-1/2 text-center px-6 max-w-4xl">
-              <p className="text-white text-2xl md:text-4xl font-semibold mb-4 drop-shadow-[0_2px_8px_rgba(0,0,0,0.8)]">
-                Hello everyone! Do you need any help?
-              </p>
-              <p className="text-white text-2xl md:text-4xl font-semibold mb-6 drop-shadow-[0_2px_8px_rgba(0,0,0,0.8)]">
-                Just consult Ralph.....
-              </p>
-              <p className="text-white/70 text-sm md:text-base italic drop-shadow-[0_2px_8px_rgba(0,0,0,0.8)]">
-                Powered by Valyu DeepResearch API
-              </p>
-            </div>
+            {/* Play button overlay */}
+            {!introStarted && (
+              <div className="absolute inset-0 flex items-center justify-center">
+                <button
+                  onClick={handleIntroStart}
+                  className="bg-white/90 hover:bg-white text-black px-8 py-4 rounded-full text-xl font-semibold shadow-2xl transition-all hover:scale-105 flex items-center gap-3"
+                >
+                  <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
+                    <path d="M8 5v14l11-7z" />
+                  </svg>
+                  Play with sound
+                </button>
+              </div>
+            )}
+            {/* Subtitles - only show when playing */}
+            {introStarted && (
+              <div className="absolute bottom-8 left-1/2 transform -translate-x-1/2 text-center px-6 max-w-4xl">
+                <p className="text-white text-2xl md:text-4xl font-semibold mb-4 drop-shadow-[0_2px_8px_rgba(0,0,0,0.8)]">
+                  Hello everyone! Do you need any help?
+                </p>
+                <p className="text-white text-2xl md:text-4xl font-semibold mb-6 drop-shadow-[0_2px_8px_rgba(0,0,0,0.8)]">
+                  Just consult Ralph.....
+                </p>
+                <p className="text-white/70 text-sm md:text-base italic drop-shadow-[0_2px_8px_rgba(0,0,0,0.8)]">
+                  Powered by Valyu DeepResearch API
+                </p>
+              </div>
+            )}
             {/* Skip button */}
             <button
               onClick={handleIntroEnd}
