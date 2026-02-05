@@ -394,7 +394,7 @@ export default function Home() {
           isSidebarCollapsed ? 'md:left-20' : 'md:left-80'
         }`}>
           <a
-            href="https://discord.gg/8TCbHsSe"
+            href="https://discord.com/invite/BhUWrFbHRa"
             target="_blank"
             rel="noopener noreferrer"
             className="text-sm text-foreground hover:text-primary transition-colors"
