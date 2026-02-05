@@ -1,4 +1,4 @@
-# [consultralph.com](https://consultraph.com)
+# [consultralph.com](https://consultralph.com)
 
 ![Ralph](consultralph.png)
 
