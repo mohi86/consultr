@@ -52,9 +52,13 @@ export default function Home() {
   const [showDiscordBanner, setShowDiscordBanner] = useState(true);
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(true);
   const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
+  const [isVideoPlaying, setIsVideoPlaying] = useState(false);
+  const [showIntro, setShowIntro] = useState(false);
+  const [introStarted, setIntroStarted] = useState(false);
 
   const cancelledRef = useRef(false);
   const pollIntervalRef = useRef<NodeJS.Timeout | null>(null);
+  const introVideoRef = useRef<HTMLVideoElement>(null);
   const getAccessToken = useAuthStore((state) => state.getAccessToken);
 
   const clearPolling = useCallback(() => {
@@ -249,6 +253,51 @@ export default function Home() {
     return () => document.removeEventListener("keydown", handleKeyDown);
   }, []);
 
+  // Check if first visit
+  useEffect(() => {
+    const hasSeenIntro = localStorage.getItem("consultralph_intro_seen");
+    if (!hasSeenIntro) {
+      setShowIntro(true);
+    }
+  }, []);
+
+  // Try to enable audio after video starts playing
+  useEffect(() => {
+    if (showIntro && introVideoRef.current) {
+      const video = introVideoRef.current;
+
+      const tryUnmute = async () => {
+        try {
+          // Start playing muted
+          await video.play();
+          // Wait a tiny bit then try to unmute
+          setTimeout(() => {
+            video.muted = false;
+            setIntroStarted(true);
+          }, 100);
+        } catch (error) {
+          console.log('Autoplay with sound blocked, showing play button');
+        }
+      };
+
+      tryUnmute();
+    }
+  }, [showIntro]);
+
+  const handleIntroStart = () => {
+    setIntroStarted(true);
+    if (introVideoRef.current) {
+      introVideoRef.current.muted = false;
+      introVideoRef.current.play();
+    }
+  };
+
+  const handleIntroEnd = () => {
+    localStorage.setItem("consultralph_intro_seen", "true");
+    setShowIntro(false);
+    setIntroStarted(false);
+  };
+
   // Cleanup on unmount
   useEffect(() => {
     return () => {
@@ -260,6 +309,57 @@ export default function Home() {
 
   return (
     <div className="min-h-screen bg-background">
+      {/* First-time intro video */}
+      {showIntro && (
+        <div className="fixed inset-0 z-[100] bg-black flex items-center justify-center">
+          <div className="relative w-full h-full flex items-center justify-center pb-24 md:pb-32">
+            <video
+              ref={introVideoRef}
+              src="/ralph.mp4"
+              playsInline
+              muted
+              className="max-w-full max-h-full object-contain"
+              onEnded={handleIntroEnd}
+            />
+            {/* Play button overlay */}
+            {!introStarted && (
+              <div className="absolute inset-0 flex items-center justify-center px-4">
+                <button
+                  onClick={handleIntroStart}
+                  className="bg-white/90 hover:bg-white active:bg-white text-black px-6 py-3 md:px-8 md:py-4 rounded-full text-lg md:text-xl font-semibold shadow-2xl transition-all hover:scale-105 active:scale-95 flex items-center gap-2 md:gap-3"
+                >
+                  <svg className="w-5 h-5 md:w-6 md:h-6" fill="currentColor" viewBox="0 0 24 24">
+                    <path d="M8 5v14l11-7z" />
+                  </svg>
+                  Play with sound
+                </button>
+              </div>
+            )}
+            {/* Subtitles - only show when playing */}
+            {introStarted && (
+              <div className="absolute bottom-8 left-1/2 transform -translate-x-1/2 text-center px-6 max-w-4xl">
+                <p className="text-white text-2xl md:text-4xl font-semibold mb-4 drop-shadow-[0_2px_8px_rgba(0,0,0,0.8)]">
+                  Hello everyone! Do you need any help?
+                </p>
+                <p className="text-white text-2xl md:text-4xl font-semibold mb-6 drop-shadow-[0_2px_8px_rgba(0,0,0,0.8)]">
+                  Just consult Ralph.....
+                </p>
+                <p className="text-white/70 text-sm md:text-base italic drop-shadow-[0_2px_8px_rgba(0,0,0,0.8)]">
+                  Powered by Valyu DeepResearch API
+                </p>
+              </div>
+            )}
+            {/* Skip button */}
+            <button
+              onClick={handleIntroEnd}
+              className="absolute top-8 right-8 text-white/80 hover:text-white transition-colors text-sm md:text-base px-4 py-2 border border-white/30 rounded-lg hover:bg-white/10"
+            >
+              Skip intro
+            </button>
+          </div>
+        </div>
+      )}
+
       <GitHubCorner />
       <SignInPanel sidebarCollapsed={isSidebarCollapsed} />
 
@@ -318,19 +418,76 @@ export default function Home() {
                   <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold md:mb-4">
                     <span className="text-foreground">Consult Ralph</span>
                   </h1>
-                  <Image
-                    src="/consultralph.png"
-                    alt="Consult Ralph"
-                    width={160}
-                    height={160}
-                    className="w-20 h-20 sm:w-24 sm:h-24 md:w-36 md:h-36 object-contain"
-                    priority
-                  />
+                  <div className="relative group cursor-pointer" onClick={() => !isVideoPlaying && setIsVideoPlaying(true)}>
+                    {/* Ralph image/video */}
+                    <div className="relative w-24 h-24 sm:w-28 sm:h-28 md:w-44 md:h-44">
+                      {isVideoPlaying ? (
+                        <video
+                          src="/ralph.mp4"
+                          autoPlay
+                          playsInline
+                          className="w-full h-full object-contain"
+                          onEnded={() => setIsVideoPlaying(false)}
+                        />
+                      ) : (
+                        <Image
+                          src="/consultralph.png"
+                          alt="Consult Ralph"
+                          width={176}
+                          height={176}
+                          className="w-full h-full object-contain group-hover:scale-105 transition-transform"
+                          priority
+                        />
+                      )}
+                    </div>
+                    {/* Ornate picture frame overlay - only shows when video is playing */}
+                    {isVideoPlaying && (
+                      <svg
+                        className="absolute inset-0 w-full h-full pointer-events-none"
+                        viewBox="0 0 200 200"
+                        style={{ filter: 'drop-shadow(0 10px 20px rgba(0,0,0,0.3))' }}
+                      >
+                        <defs>
+                          <linearGradient id="frameGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                            <stop offset="0%" style={{ stopColor: '#d4a574', stopOpacity: 1 }} />
+                            <stop offset="50%" style={{ stopColor: '#c19a6b', stopOpacity: 1 }} />
+                            <stop offset="100%" style={{ stopColor: '#a67c52', stopOpacity: 1 }} />
+                          </linearGradient>
+                          <linearGradient id="frameHighlight" x1="0%" y1="0%" x2="0%" y2="100%">
+                            <stop offset="0%" style={{ stopColor: '#f4e4d4', stopOpacity: 0.8 }} />
+                            <stop offset="100%" style={{ stopColor: '#c19a6b', stopOpacity: 0.2 }} />
+                          </linearGradient>
+                        </defs>
+
+                        {/* Outer frame border */}
+                        <rect x="2" y="2" width="196" height="196" fill="none" stroke="url(#frameGradient)" strokeWidth="16" rx="4" />
+
+                        {/* Inner decorative border */}
+                        <rect x="10" y="10" width="180" height="180" fill="none" stroke="url(#frameGradient)" strokeWidth="3" rx="2" />
+
+                        {/* Corner ornaments */}
+                        <circle cx="20" cy="20" r="4" fill="url(#frameHighlight)" />
+                        <circle cx="180" cy="20" r="4" fill="url(#frameHighlight)" />
+                        <circle cx="20" cy="180" r="4" fill="url(#frameHighlight)" />
+                        <circle cx="180" cy="180" r="4" fill="url(#frameHighlight)" />
+
+                        {/* Side ornaments */}
+                        <circle cx="100" cy="10" r="3" fill="url(#frameHighlight)" />
+                        <circle cx="100" cy="190" r="3" fill="url(#frameHighlight)" />
+                        <circle cx="10" cy="100" r="3" fill="url(#frameHighlight)" />
+                        <circle cx="190" cy="100" r="3" fill="url(#frameHighlight)" />
+
+                        {/* Inner shadow effect */}
+                        <rect x="18" y="18" width="164" height="164" fill="none" stroke="#00000020" strokeWidth="1" rx="2" />
+                      </svg>
+                    )}
+                  </div>
                 </div>
                 <p className="text-base sm:text-lg text-text-muted max-w-2xl mx-auto px-2">
-                  AI-powered deep research for consultants. Generate
+                  Free AI-powered deep research for consultants. Generate
                   comprehensive due diligence reports, market analyses,
                   competitive landscapes, and strategic insights in minutes.
+                  Powered by Valyu - the Search API for AI knowledge work.
                 </p>
               </div>
 
@@ -370,17 +527,20 @@ export default function Home() {
               </div>
 
               {/* Footer */}
-              <footer className="mt-8 sm:mt-12 text-center text-xs sm:text-sm text-text-muted px-2">
+              <footer className="mt-8 sm:mt-12 text-center text-xs sm:text-sm text-text-muted px-2 space-y-1">
                 <p>
-                  Powered by{" "}
+                  <span className="font-medium text-foreground">Free</span> deep research powered by{" "}
                   <a
                     href="https://valyu.ai"
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="text-primary hover:underline"
+                    className="text-primary hover:underline font-medium"
                   >
-                    Valyu Deep Research API
+                    Valyu
                   </a>
+                </p>
+                <p className="text-xs">
+                  Valyu - the Search API for AI knowledge work
                 </p>
               </footer>
             </div>
