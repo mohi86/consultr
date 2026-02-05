@@ -53,6 +53,7 @@ export default function Home() {
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(true);
   const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
   const [isVideoPlaying, setIsVideoPlaying] = useState(false);
+  const [showIntro, setShowIntro] = useState(false);
 
   const cancelledRef = useRef(false);
   const pollIntervalRef = useRef<NodeJS.Timeout | null>(null);
@@ -250,6 +251,19 @@ export default function Home() {
     return () => document.removeEventListener("keydown", handleKeyDown);
   }, []);
 
+  // Check if first visit
+  useEffect(() => {
+    const hasSeenIntro = localStorage.getItem("consultralph_intro_seen");
+    if (!hasSeenIntro) {
+      setShowIntro(true);
+    }
+  }, []);
+
+  const handleIntroEnd = () => {
+    localStorage.setItem("consultralph_intro_seen", "true");
+    setShowIntro(false);
+  };
+
   // Cleanup on unmount
   useEffect(() => {
     return () => {
@@ -261,6 +275,40 @@ export default function Home() {
 
   return (
     <div className="min-h-screen bg-background">
+      {/* First-time intro video */}
+      {showIntro && (
+        <div className="fixed inset-0 z-[100] bg-black flex items-center justify-center">
+          <div className="relative w-full h-full flex items-center justify-center">
+            <video
+              src="/ralph.mp4"
+              autoPlay
+              playsInline
+              className="max-w-full max-h-full object-contain"
+              onEnded={handleIntroEnd}
+            />
+            {/* Subtitles */}
+            <div className="absolute bottom-20 left-1/2 transform -translate-x-1/2 text-center px-6 max-w-4xl">
+              <p className="text-white text-2xl md:text-4xl font-semibold mb-4 drop-shadow-[0_2px_8px_rgba(0,0,0,0.8)]">
+                Hello everyone! Do you need any help?
+              </p>
+              <p className="text-white text-2xl md:text-4xl font-semibold mb-4 drop-shadow-[0_2px_8px_rgba(0,0,0,0.8)]">
+                Just consult Ralph.....
+              </p>
+              <p className="text-white/80 text-lg md:text-xl drop-shadow-[0_2px_8px_rgba(0,0,0,0.8)]">
+                Powered by Valyu DeepResearch API
+              </p>
+            </div>
+            {/* Skip button */}
+            <button
+              onClick={handleIntroEnd}
+              className="absolute top-8 right-8 text-white/80 hover:text-white transition-colors text-sm md:text-base px-4 py-2 border border-white/30 rounded-lg hover:bg-white/10"
+            >
+              Skip intro
+            </button>
+          </div>
+        </div>
+      )}
+
       <GitHubCorner />
       <SignInPanel sidebarCollapsed={isSidebarCollapsed} />
 
