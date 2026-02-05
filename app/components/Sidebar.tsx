@@ -146,12 +146,16 @@ export default function Sidebar({
 
   return (
     <aside
-      className={`hidden md:flex flex-col bg-surface border-r border-border transition-all duration-300 ${
+      className={`hidden md:flex flex-col border-r transition-all duration-300 h-screen sticky top-0 z-20 ${
         isCollapsed ? "w-16" : "w-72"
       }`}
+      style={{
+        backgroundColor: "var(--sidebar)",
+        borderColor: "var(--sidebar-border)"
+      }}
     >
       {/* Header */}
-      <div className="p-4 border-b border-border">
+      <div className="p-4 border-b border-sidebar-border">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
             <div className="p-2 bg-primary/10 rounded-lg flex-shrink-0">
@@ -164,7 +168,7 @@ export default function Sidebar({
           {!isCollapsed && (
             <button
               onClick={() => setIsCollapsed(true)}
-              className="p-1.5 hover:bg-surface-hover rounded-lg transition-colors"
+              className="p-1.5 hover:bg-sidebar-accent rounded-lg transition-colors"
               aria-label="Collapse sidebar"
             >
               <ChevronLeft className="w-4 h-4 text-text-muted" />
@@ -175,7 +179,7 @@ export default function Sidebar({
 
       {/* New Research Button */}
       {!isCollapsed && (
-        <div className="p-2 border-b border-border">
+        <div className="p-2 border-b border-sidebar-border">
           <button
             onClick={onNewResearch}
             className="w-full flex items-center justify-center gap-2 p-3 bg-primary text-white rounded-lg hover:bg-primary/90 transition-colors"
@@ -188,7 +192,7 @@ export default function Sidebar({
 
       {/* History Header */}
       {!isCollapsed && (
-        <div className="px-4 py-3 border-b border-border">
+        <div className="px-4 py-3 border-b border-sidebar-border">
           <div className="flex items-center gap-2 text-sm font-medium text-text-muted">
             <History className="w-4 h-4" />
             <span>Research History</span>
@@ -209,7 +213,7 @@ export default function Sidebar({
             <div className="space-y-1">
               <button
                 onClick={onNewResearch}
-                className="w-full flex items-center justify-center p-3 rounded-lg hover:bg-surface-hover transition-colors text-primary"
+                className="w-full flex items-center justify-center p-3 rounded-lg hover:bg-sidebar-accent transition-colors text-primary"
                 title="New Research"
               >
                 <Plus className="w-5 h-5" />
@@ -222,7 +226,7 @@ export default function Sidebar({
                     openSignInModal();
                   }
                 }}
-                className="w-full flex items-center justify-center p-3 rounded-lg hover:bg-surface-hover transition-colors text-text-muted"
+                className="w-full flex items-center justify-center p-3 rounded-lg hover:bg-sidebar-accent transition-colors text-text-muted"
                 title={canViewHistory ? "Research History" : "Sign in to view history"}
               >
                 {canViewHistory ? (
@@ -273,7 +277,7 @@ export default function Sidebar({
                           className={`w-full flex items-start gap-3 p-3 rounded-lg transition-colors text-left group cursor-pointer ${
                             isActive
                               ? "bg-primary/10 text-primary"
-                              : "hover:bg-surface-hover text-foreground"
+                              : "hover:bg-sidebar-accent text-foreground"
                           }`}
                           role="button"
                           tabIndex={0}
@@ -307,7 +311,7 @@ export default function Sidebar({
                     })}
                   </div>
                 </div>
-                <div className="p-2 border-t border-border">
+                <div className="p-2 border-t border-sidebar-border">
                   <button
                     onClick={handleClearHistory}
                     className="w-full flex items-center justify-center gap-2 p-2 text-sm text-text-muted hover:text-error hover:bg-error/5 rounded-lg transition-colors"
@@ -323,14 +327,14 @@ export default function Sidebar({
       </div>
 
       {/* Bottom Items */}
-      <div className="p-2 border-t border-border">
+      <div className="p-2 border-t border-sidebar-border">
         <div className="space-y-1">
           {bottomItems.map((item, index) => {
             const Icon = item.icon;
             return (
               <button
                 key={index}
-                className="w-full flex items-center gap-3 p-3 rounded-lg hover:bg-surface-hover transition-colors text-text-muted text-left"
+                className="w-full flex items-center gap-3 p-3 rounded-lg hover:bg-sidebar-accent transition-colors text-text-muted text-left"
                 title={isCollapsed ? item.label : undefined}
               >
                 <Icon className="w-5 h-5 flex-shrink-0" />
@@ -343,7 +347,7 @@ export default function Sidebar({
           {/* Theme Toggle */}
           <button
             onClick={toggleTheme}
-            className="w-full flex items-center gap-3 p-3 rounded-lg hover:bg-surface-hover transition-colors text-text-muted text-left"
+            className="w-full flex items-center gap-3 p-3 rounded-lg hover:bg-sidebar-accent transition-colors text-text-muted text-left"
             title={isCollapsed ? (theme === "light" ? "Switch to Dark Mode" : "Switch to Light Mode") : undefined}
           >
             {theme === "light" ? (
@@ -363,7 +367,7 @@ export default function Sidebar({
       {/* Collapse Toggle */}
       <button
         onClick={() => setIsCollapsed(!isCollapsed)}
-        className="p-3 border-t border-border hover:bg-surface-hover transition-colors flex items-center justify-center"
+        className="p-3 border-t border-sidebar-border hover:bg-sidebar-accent transition-colors flex items-center justify-center"
         aria-label={isCollapsed ? "Expand sidebar" : "Collapse sidebar"}
       >
         {isCollapsed ? (

@@ -108,10 +108,21 @@ export const useAuthStore = create<AuthState>()(
       showSignInModal: false,
 
       initialize: () => {
-        if (get().initialized) return;
+        // Check if already authenticated (e.g., from client-side navigation after sign-in)
+        const currentState = get();
+        if (currentState.isAuthenticated && currentState.accessToken) {
+          set({ initialized: true, isLoading: false });
+          return;
+        }
+
+        if (currentState.initialized) {
+          set({ isLoading: false });
+          return;
+        }
+
         set({ initialized: true });
 
-        // Load tokens from localStorage first
+        // Load tokens from localStorage
         const { user, tokens } = loadInitialTokens();
         if (user && tokens) {
           set({
@@ -125,13 +136,6 @@ export const useAuthStore = create<AuthState>()(
           return;
         }
 
-        // Failsafe timeout - if nothing happens in 2 seconds, stop loading
-        const timeoutId = setTimeout(() => {
-          if (get().isLoading) {
-            set({ isLoading: false });
-          }
-        }, 2000);
-
         // No valid tokens found
         set({
           user: null,
@@ -141,8 +145,6 @@ export const useAuthStore = create<AuthState>()(
           isAuthenticated: false,
           isLoading: false,
         });
-
-        clearTimeout(timeoutId);
       },
 
       signIn: (user, tokens) => {
@@ -187,13 +189,36 @@ export const useAuthStore = create<AuthState>()(
 
       getAccessToken: () => {
         const state = get();
-        if (!state.accessToken) return null;
 
-        if (state.tokenExpiresAt && isTokenExpired(state.tokenExpiresAt)) {
-          return null;
+        // First try to get from state
+        if (state.accessToken) {
+          if (state.tokenExpiresAt && isTokenExpired(state.tokenExpiresAt)) {
+            return null;
+          }
+          return state.accessToken;
         }
 
-        return state.accessToken;
+        // Fallback: try to load directly from localStorage
+        // This handles race conditions where state hasn't been updated yet
+        const tokens = loadTokens();
+        if (tokens && tokens.accessToken && !isTokenExpired(tokens.expiresAt)) {
+          // Also update state for future calls
+          const user = loadUser();
+          if (user) {
+            set({
+              user,
+              accessToken: tokens.accessToken,
+              refreshToken: tokens.refreshToken || null,
+              tokenExpiresAt: tokens.expiresAt,
+              isAuthenticated: true,
+              isLoading: false,
+              initialized: true,
+            });
+          }
+          return tokens.accessToken;
+        }
+
+        return null;
       },
 
       openSignInModal: () => {

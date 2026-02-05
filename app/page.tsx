@@ -12,6 +12,7 @@ import {
   updateHistoryStatus,
   ResearchHistoryItem,
 } from "./lib/researchHistory";
+import { useAuthStore } from "./stores/auth-store";
 
 interface ResearchResult {
   status: string;
@@ -51,6 +52,7 @@ export default function Home() {
 
   const cancelledRef = useRef(false);
   const pollIntervalRef = useRef<NodeJS.Timeout | null>(null);
+  const getAccessToken = useAuthStore((state) => state.getAccessToken);
 
   const clearPolling = useCallback(() => {
     if (pollIntervalRef.current) {
@@ -67,9 +69,11 @@ export default function Home() {
       }
 
       try {
-        const response = await fetch(
-          `/api/consulting-research/status?taskId=${taskId}`
-        );
+        const accessToken = getAccessToken();
+        const statusUrl = accessToken
+          ? `/api/consulting-research/status?taskId=${taskId}&accessToken=${encodeURIComponent(accessToken)}`
+          : `/api/consulting-research/status?taskId=${taskId}`;
+        const response = await fetch(statusUrl);
 
         if (!response.ok) {
           const error = await response.json();
@@ -98,7 +102,7 @@ export default function Home() {
         console.error("Error polling status:", error);
       }
     },
-    [clearPolling]
+    [clearPolling, getAccessToken]
   );
 
   const handleTaskCreated = useCallback(

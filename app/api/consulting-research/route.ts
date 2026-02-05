@@ -29,25 +29,44 @@ async function createResearchWithOAuth(
 ) {
   const proxyUrl = `${VALYU_APP_URL}/api/oauth/proxy`;
 
+  // Debug logging
+  console.log("[OAuth] Proxy URL:", proxyUrl);
+  console.log("[OAuth] Token (first 20 chars):", accessToken.substring(0, 20) + "...");
+  console.log("[OAuth] Token length:", accessToken.length);
+
+  const requestBody = {
+    path: "/v1/deepresearch/tasks",
+    method: "POST",
+    body: {
+      query,
+      deliverables,
+      mode: "fast",
+      output_formats: ["markdown", "pdf"],
+    },
+  };
+
+  console.log("[OAuth] Request body (without query):", {
+    path: requestBody.path,
+    method: requestBody.method,
+    body: { deliverables: requestBody.body.deliverables, mode: requestBody.body.mode },
+  });
+
   const response = await fetch(proxyUrl, {
     method: "POST",
     headers: {
       Authorization: `Bearer ${accessToken}`,
       "Content-Type": "application/json",
     },
-    body: JSON.stringify({
-      path: "/v1/deepresearch",
-      method: "POST",
-      body: {
-        query,
-        deliverables,
-        mode: "fast",
-      },
-    }),
+    body: JSON.stringify(requestBody),
   });
+
+  console.log("[OAuth] Response status:", response.status);
+  console.log("[OAuth] Response headers:", Object.fromEntries(response.headers.entries()));
 
   if (!response.ok) {
     const errorText = await response.text();
+    console.log("[OAuth] Error response body:", errorText);
+
     let errorData;
     try {
       errorData = JSON.parse(errorText);
@@ -62,7 +81,8 @@ async function createResearchWithOAuth(
 
     // Check for auth errors
     if (response.status === 401 || response.status === 403) {
-      throw new Error("Session expired. Please sign in again.");
+      console.log("[OAuth] Auth error - token may be invalid or expired");
+      throw new Error(`Session expired. Please sign in again. (${response.status}: ${errorData.message || errorData.error || 'Unknown error'})`);
     }
 
     throw new Error(errorData.message || errorData.error || "Failed to create research");
