@@ -275,7 +275,7 @@ export default function Home() {
       {/* First-time intro video */}
       {showIntro && (
         <div className="fixed inset-0 z-[100] bg-black flex items-center justify-center">
-          <div className="relative w-full h-full flex items-center justify-center">
+          <div className="relative w-full h-full flex items-center justify-center pb-24 md:pb-32">
             <video
               src="/ralph.mp4"
               autoPlay
