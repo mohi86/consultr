@@ -92,6 +92,13 @@ export default function Home() {
         }
 
         const data = await response.json();
+        console.log('[DEBUG] Status API response:', {
+          status: data.status,
+          hasDeliverables: !!data.deliverables,
+          hasOutput: !!data.output,
+          hasPdfUrl: !!data.pdf_url,
+          deliverableCount: data.deliverables?.length,
+        });
         setResearchResult(data);
 
         // Update history status

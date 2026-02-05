@@ -186,6 +186,9 @@ export default function ResearchResults({
     ? Math.round((result.progress.current_step / result.progress.total_steps) * 100)
     : 0;
 
+  // If completed but no data yet, treat as loading
+  const isLoadingData = isComplete && !result.deliverables && !result.pdf_url && !result.output;
+
   return (
     <div className="space-y-4 sm:space-y-6">
       {/* File Viewer Modal */}
@@ -198,7 +201,7 @@ export default function ResearchResults({
       />
 
       {/* Status Header */}
-      {isInProgress && (
+      {(isInProgress || isLoadingData) && (
         <div className="card">
           <div className="flex flex-col items-center text-center">
             {/* Animated Loading Ring */}
