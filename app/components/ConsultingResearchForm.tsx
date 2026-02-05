@@ -156,11 +156,11 @@ export default function ConsultingResearchForm({
   };
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-6">
+    <form onSubmit={handleSubmit} className="space-y-5 sm:space-y-6">
       {/* Research Type Selection */}
       <div>
-        <label className="block text-sm font-medium mb-3">Research Type</label>
-        <div className="grid grid-cols-2 md:grid-cols-5 gap-2">
+        <label className="block text-sm sm:text-base font-medium mb-3">Research Type</label>
+        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-2 sm:gap-3">
           {researchTypes.map((type) => {
             const Icon = type.icon;
             return (
@@ -171,26 +171,26 @@ export default function ConsultingResearchForm({
                   setResearchType(type.id);
                   setResearchSubject("");
                 }}
-                className={`p-3 rounded-lg border text-left transition-all ${
+                className={`p-3 sm:p-4 rounded-lg border text-left transition-all min-h-[60px] sm:min-h-[70px] active:scale-95 ${
                   researchType === type.id
                     ? "border-primary bg-primary/5 text-primary"
                     : "border-border hover:border-primary/50 hover:bg-surface"
                 }`}
               >
-                <Icon className="w-5 h-5 mb-1" />
-                <span className="text-xs font-medium block truncate">
+                <Icon className="w-5 h-5 sm:w-6 sm:h-6 mb-1" />
+                <span className="text-xs sm:text-sm font-medium block truncate">
                   {type.label.split(" ")[0]}
                 </span>
               </button>
             );
           })}
         </div>
-        <p className="text-sm text-text-muted mt-2">{selectedType.description}</p>
+        <p className="text-xs sm:text-sm text-text-muted mt-2">{selectedType.description}</p>
       </div>
 
       {/* Research Subject Input */}
       <div>
-        <label htmlFor="researchSubject" className="block text-sm font-medium mb-2">
+        <label htmlFor="researchSubject" className="block text-sm sm:text-base font-medium mb-2">
           {researchType === "company"
             ? "Company Name"
             : researchType === "market"
@@ -207,20 +207,20 @@ export default function ConsultingResearchForm({
           value={researchSubject}
           onChange={(e) => setResearchSubject(e.target.value)}
           placeholder={selectedType.placeholder}
-          className="input-field"
+          className="input-field text-base"
           required
           disabled={isSubmitting || isResearching}
         />
 
         {/* Quick Examples */}
         {quickExamples[researchType].length > 0 && (
-          <div className="flex flex-wrap gap-2 mt-2">
+          <div className="flex flex-wrap gap-2 mt-2 sm:mt-3">
             {quickExamples[researchType].map((example) => (
               <button
                 key={example}
                 type="button"
                 onClick={() => handleQuickSelect(example)}
-                className="px-3 py-1 text-xs bg-surface hover:bg-surface-hover border border-border rounded-full transition-colors"
+                className="px-3 py-1.5 text-xs sm:text-sm bg-surface hover:bg-surface-hover border border-border rounded-full transition-all active:scale-95 min-h-[32px]"
                 disabled={isSubmitting || isResearching}
               >
                 {example}
@@ -232,7 +232,7 @@ export default function ConsultingResearchForm({
 
       {/* Research Focus */}
       <div>
-        <label htmlFor="researchFocus" className="block text-sm font-medium mb-2">
+        <label htmlFor="researchFocus" className="block text-sm sm:text-base font-medium mb-2">
           Research Focus{" "}
           <span className="text-text-muted font-normal">(Optional)</span>
         </label>
@@ -241,7 +241,7 @@ export default function ConsultingResearchForm({
           value={researchFocus}
           onChange={(e) => setResearchFocus(e.target.value)}
           placeholder="Specify particular aspects to focus on, e.g., 'Focus on their AI capabilities and recent acquisitions' or 'Emphasize regulatory landscape and barriers to entry'"
-          className="input-field resize-none h-20"
+          className="input-field resize-none h-20 sm:h-24 text-base"
           disabled={isSubmitting || isResearching}
         />
       </div>
@@ -251,18 +251,18 @@ export default function ConsultingResearchForm({
         <button
           type="button"
           onClick={() => setShowAdvanced(!showAdvanced)}
-          className="flex items-center gap-2 text-sm text-text-muted hover:text-foreground transition-colors"
+          className="flex items-center gap-2 text-sm sm:text-base text-text-muted hover:text-foreground transition-colors min-h-[44px] -ml-2 pl-2"
         >
-          {showAdvanced ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
+          {showAdvanced ? <ChevronUp size={18} /> : <ChevronDown size={18} />}
           Advanced Options
         </button>
 
         {showAdvanced && (
-          <div className="mt-4 space-y-4 p-4 bg-surface rounded-lg border border-border">
+          <div className="mt-4 space-y-4 p-3 sm:p-4 bg-surface rounded-lg border border-border">
             <div>
               <label
                 htmlFor="clientContext"
-                className="block text-sm font-medium mb-2"
+                className="block text-sm sm:text-base font-medium mb-2"
               >
                 Client Context
               </label>
@@ -271,7 +271,7 @@ export default function ConsultingResearchForm({
                 value={clientContext}
                 onChange={(e) => setClientContext(e.target.value)}
                 placeholder="e.g., 'Client is a PE firm evaluating acquisition' or 'Fortune 500 company exploring market entry'"
-                className="input-field resize-none h-16"
+                className="input-field resize-none h-16 sm:h-20 text-base"
                 disabled={isSubmitting || isResearching}
               />
             </div>
@@ -279,7 +279,7 @@ export default function ConsultingResearchForm({
             <div>
               <label
                 htmlFor="specificQuestions"
-                className="block text-sm font-medium mb-2"
+                className="block text-sm sm:text-base font-medium mb-2"
               >
                 Specific Questions to Answer
               </label>
@@ -288,7 +288,7 @@ export default function ConsultingResearchForm({
                 value={specificQuestions}
                 onChange={(e) => setSpecificQuestions(e.target.value)}
                 placeholder="List specific questions you need answered, one per line..."
-                className="input-field resize-none h-20"
+                className="input-field resize-none h-20 sm:h-24 text-base"
                 disabled={isSubmitting || isResearching}
               />
             </div>
@@ -298,7 +298,7 @@ export default function ConsultingResearchForm({
 
       {/* Error Message */}
       {error && (
-        <div className="p-3 bg-error/10 border border-error/30 rounded-lg text-error text-sm">
+        <div className="p-3 sm:p-4 bg-error/10 border border-error/30 rounded-lg text-error text-sm sm:text-base">
           {error}
         </div>
       )}
@@ -307,23 +307,23 @@ export default function ConsultingResearchForm({
       <button
         type="submit"
         disabled={isSubmitting || isResearching || !researchSubject.trim()}
-        className="btn-primary w-full flex items-center justify-center gap-2"
+        className="btn-primary w-full flex items-center justify-center gap-2 min-h-[48px] sm:min-h-[52px] text-base sm:text-lg"
       >
         {isSubmitting ? (
           <>
-            <Loader2 className="w-5 h-5 animate-spin" />
-            Starting Research...
+            <Loader2 className="w-5 h-5 sm:w-6 sm:h-6 animate-spin" />
+            <span>Starting Research...</span>
           </>
         ) : (
           <>
-            <Search className="w-5 h-5" />
-            Start Deep Research
+            <Search className="w-5 h-5 sm:w-6 sm:h-6" />
+            <span>Start Deep Research</span>
           </>
         )}
       </button>
 
       {/* Info Text */}
-      <p className="text-xs text-text-muted text-center">
+      <p className="text-xs sm:text-sm text-text-muted text-center px-2">
         Research typically takes 5-10 minutes. You&apos;ll receive a comprehensive
         PDF report, data spreadsheet, and executive summary. You can also run multiple research all at once.
       </p>

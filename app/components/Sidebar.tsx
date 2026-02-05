@@ -22,6 +22,8 @@ import {
   XCircle,
   Plus,
   Lock,
+  X,
+  Menu,
 } from "lucide-react";
 import {
   getResearchHistory,
@@ -40,6 +42,8 @@ interface SidebarProps {
   currentResearchId?: string | null;
   isCollapsed?: boolean;
   onCollapsedChange?: (collapsed: boolean) => void;
+  mobileOpen?: boolean;
+  onMobileToggle?: () => void;
 }
 
 const bottomItems = [
@@ -53,6 +57,8 @@ export default function Sidebar({
   currentResearchId,
   isCollapsed: controlledCollapsed,
   onCollapsedChange,
+  mobileOpen = false,
+  onMobileToggle,
 }: SidebarProps) {
   const [internalCollapsed, setInternalCollapsed] = useState(true);
 
@@ -155,12 +161,30 @@ export default function Sidebar({
     }
   };
 
+  const handleHistorySelect = (item: ResearchHistoryItem) => {
+    onSelectHistory?.(item);
+    // Auto-close mobile drawer when selecting history item
+    if (onMobileToggle && mobileOpen) {
+      onMobileToggle();
+    }
+  };
+
   return (
-    <aside
-      className={`hidden md:flex flex-col border-r border-border bg-surface transition-all duration-300 h-screen sticky top-0 z-20 ${
-        isCollapsed ? "w-16" : "w-72"
-      }`}
-    >
+    <>
+      {/* Mobile Overlay */}
+      {mobileOpen && (
+        <div
+          className="fixed inset-0 bg-black/50 backdrop-blur-sm z-40 md:hidden transition-opacity duration-300"
+          onClick={onMobileToggle}
+        />
+      )}
+
+      {/* Desktop Sidebar */}
+      <aside
+        className={`hidden md:flex flex-col border-r border-border bg-surface transition-all duration-300 h-screen sticky top-0 z-20 ${
+          isCollapsed ? "w-16" : "w-72"
+        }`}
+      >
       {/* Header */}
       <div className="p-4 border-b border-border">
         <div className="flex items-center justify-between">
@@ -282,7 +306,7 @@ export default function Sidebar({
                       return (
                         <div
                           key={item.id}
-                          onClick={() => onSelectHistory?.(item)}
+                          onClick={() => handleHistorySelect(item)}
                           className={`w-full flex items-start gap-3 p-3 rounded-lg transition-colors text-left group cursor-pointer ${
                             isActive
                               ? "bg-primary/10 text-primary"
@@ -292,7 +316,7 @@ export default function Sidebar({
                           tabIndex={0}
                           onKeyDown={(e) => {
                             if (e.key === "Enter" || e.key === " ") {
-                              onSelectHistory?.(item);
+                              handleHistorySelect(item);
                             }
                           }}
                         >
@@ -389,5 +413,182 @@ export default function Sidebar({
         )}
       </button>
     </aside>
+
+    {/* Mobile Sidebar */}
+    <aside
+      className={`fixed top-0 left-0 h-screen w-72 bg-surface border-r border-border z-50 md:hidden flex flex-col transform transition-transform duration-300 ease-in-out ${
+        mobileOpen ? "translate-x-0" : "-translate-x-full"
+      }`}
+    >
+      {/* Header */}
+      <div className="p-4 border-b border-border">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <div className="p-2 bg-primary/10 rounded-lg flex-shrink-0">
+              <Briefcase className="w-5 h-5 text-primary" />
+            </div>
+            <span className="font-semibold text-sm">Consulting Intel</span>
+          </div>
+          <button
+            onClick={onMobileToggle}
+            className="p-1.5 hover:bg-surface-hover rounded-lg transition-colors"
+            aria-label="Close sidebar"
+          >
+            <X className="w-5 h-5 text-text-muted" />
+          </button>
+        </div>
+      </div>
+
+      {/* New Research Button */}
+      {isAuthenticated && (
+        <div className="p-2 border-b border-border">
+          <button
+            onClick={() => {
+              onNewResearch?.();
+              onMobileToggle?.();
+            }}
+            className="w-full flex items-center justify-center gap-2 p-3 bg-primary text-white rounded-lg hover:bg-primary/90 transition-colors"
+          >
+            <Plus className="w-4 h-4" />
+            <span className="text-sm font-medium">New Research</span>
+          </button>
+        </div>
+      )}
+
+      {/* History Header */}
+      <div className="px-4 py-3 border-b border-border">
+        <div className="flex items-center gap-2 text-sm font-medium text-text-muted">
+          <History className="w-4 h-4" />
+          <span>Research History</span>
+          {history.length > 0 && (
+            <span className="px-1.5 py-0.5 text-xs bg-primary/10 text-primary rounded-full">
+              {history.length}
+            </span>
+          )}
+        </div>
+      </div>
+
+      {/* Content Area */}
+      <div className="flex-1 overflow-hidden">
+        <div className="flex flex-col h-full">
+          {!canViewHistory ? (
+            <div className="flex-1 flex flex-col items-center justify-center p-4 text-center">
+              <Lock className="w-8 h-8 text-text-muted mb-2" />
+              <p className="text-sm text-text-muted">Sign in to view history</p>
+              <p className="text-xs text-text-muted mt-1">
+                Your research history will be saved when signed in
+              </p>
+              <button
+                onClick={openSignInModal}
+                className="mt-4 px-4 py-2 bg-primary text-white text-sm rounded-lg hover:bg-primary/90 transition-colors"
+              >
+                Sign in
+              </button>
+            </div>
+          ) : history.length === 0 ? (
+            <div className="flex-1 flex flex-col items-center justify-center p-4 text-center">
+              <History className="w-8 h-8 text-text-muted mb-2" />
+              <p className="text-sm text-text-muted">No research history yet</p>
+              <p className="text-xs text-text-muted mt-1">
+                Your research will appear here
+              </p>
+            </div>
+          ) : (
+            <>
+              <div className="flex-1 overflow-y-auto p-2">
+                <div className="space-y-1">
+                  {history.map((item) => {
+                    const TypeIcon = getTypeIcon(item.researchType);
+                    const isActive = currentResearchId === item.id;
+                    return (
+                      <div
+                        key={item.id}
+                        onClick={() => handleHistorySelect(item)}
+                        className={`w-full flex items-start gap-3 p-3 rounded-lg transition-colors text-left group cursor-pointer ${
+                          isActive
+                            ? "bg-primary/10 text-primary"
+                            : "hover:bg-surface-hover text-foreground"
+                        }`}
+                        role="button"
+                        tabIndex={0}
+                        onKeyDown={(e) => {
+                          if (e.key === "Enter" || e.key === " ") {
+                            handleHistorySelect(item);
+                          }
+                        }}
+                      >
+                        <TypeIcon className="w-4 h-4 mt-0.5 flex-shrink-0 text-text-muted" />
+                        <div className="flex-1 min-w-0">
+                          <div className="text-sm font-medium truncate">
+                            {item.title}
+                          </div>
+                          <div className="flex items-center gap-2 mt-1">
+                            {getStatusIcon(item.status)}
+                            <span className="text-xs text-text-muted">
+                              {formatDate(item.createdAt)}
+                            </span>
+                          </div>
+                        </div>
+                        <button
+                          onClick={(e) => handleRemoveItem(item.id, e)}
+                          className="opacity-0 group-hover:opacity-100 p-1 hover:bg-error/10 rounded transition-all"
+                          title="Remove from history"
+                        >
+                          <Trash2 className="w-3 h-3 text-error" />
+                        </button>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+              <div className="p-2 border-t border-border">
+                <button
+                  onClick={handleClearHistory}
+                  className="w-full flex items-center justify-center gap-2 p-2 text-sm text-text-muted hover:text-error hover:bg-error/5 rounded-lg transition-colors"
+                >
+                  <Trash2 className="w-4 h-4" />
+                  Clear History
+                </button>
+              </div>
+            </>
+          )}
+        </div>
+      </div>
+
+      {/* Bottom Items */}
+      <div className="p-2 border-t border-border">
+        <div className="space-y-1">
+          {bottomItems.map((item, index) => {
+            const Icon = item.icon;
+            return (
+              <a
+                key={index}
+                href={item.href}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="w-full flex items-center gap-3 p-3 rounded-lg hover:bg-surface-hover transition-colors text-text-muted text-left"
+              >
+                <Icon className="w-5 h-5 flex-shrink-0" />
+                <span className="text-sm truncate">{item.label}</span>
+              </a>
+            );
+          })}
+          <button
+            onClick={toggleTheme}
+            className="w-full flex items-center gap-3 p-3 rounded-lg hover:bg-surface-hover transition-colors text-text-muted text-left"
+          >
+            {theme === "light" ? (
+              <Moon className="w-5 h-5 flex-shrink-0" />
+            ) : (
+              <Sun className="w-5 h-5 flex-shrink-0" />
+            )}
+            <span className="text-sm truncate">
+              {theme === "light" ? "Dark Mode" : "Light Mode"}
+            </span>
+          </button>
+        </div>
+      </div>
+    </aside>
+  </>
   );
 }
