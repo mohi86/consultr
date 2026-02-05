@@ -146,7 +146,7 @@ CMD ["npm", "start"]
 consulting-research/
 ├── app/
 │   ├── api/
-│   │   └── consulting-research/    # Research API routes
+│   │   └── /    # Research API routes
 │   │       ├── route.ts            # Create research task
 │   │       ├── status/route.ts     # Get task status
 │   │       └── cancel/route.ts     # Cancel task

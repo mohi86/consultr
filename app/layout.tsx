@@ -15,11 +15,11 @@ const geistMono = Geist_Mono({
 
 export const metadata: Metadata = {
   metadataBase: new URL(
-    process.env.NEXT_PUBLIC_APP_URL || "https://consulting-research.valyu.network"
+    process.env.NEXT_PUBLIC_APP_URL || "https://consultralph.com"
   ),
   title: "Consult Ralph | AI-Powered Deep Research for Consultants",
   description:
-    "Generate comprehensive research reports for due diligence, market analysis, competitive landscapes, and strategic insights. Built for consultants at top firms.",
+    "Generate comprehensive research reports for due diligence, market analysis, competitive landscapes, and strategic insights. Built for consultants at top firms. EY, Deloitte, PwC, KPMG, McKinsey, BCG, Bain, investment banks and any consultant",
   keywords: [
     "consulting",
     "research",
@@ -29,6 +29,8 @@ export const metadata: Metadata = {
     "AI research",
     "business intelligence",
     "strategy consulting",
+    "EY",
+    ""
   ],
   authors: [{ name: "Consulting Research Intelligence" }],
   creator: "Consulting Research Intelligence",
@@ -44,7 +46,7 @@ export const metadata: Metadata = {
     ],
   },
   openGraph: {
-    title: "Consult Ralph | AI-Powered Deep Research",
+    title: "Consult Ralph | AI-Powered Deep Research for Consultants",
     description:
       "Generate comprehensive research reports in minutes. AI-powered deep research for due diligence, market analysis, and competitive intelligence. Built for consultants at top firms.",
     type: "website",

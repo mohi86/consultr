@@ -3,7 +3,7 @@
 export default function GitHubCorner() {
   return (
     <a
-      href="https://github.com/unicodeveloper/consulting-research"
+      href="https://github.com/unicodeveloper/consultralph"
       target="_blank"
       rel="noopener noreferrer"
       className="github-corner fixed top-0 right-0 z-50"
