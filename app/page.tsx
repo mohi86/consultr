@@ -52,6 +52,7 @@ export default function Home() {
   const [showDiscordBanner, setShowDiscordBanner] = useState(true);
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(true);
   const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
+  const [isVideoPlaying, setIsVideoPlaying] = useState(false);
 
   const cancelledRef = useRef(false);
   const pollIntervalRef = useRef<NodeJS.Timeout | null>(null);
@@ -318,14 +319,27 @@ export default function Home() {
                   <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold md:mb-4">
                     <span className="text-foreground">Consult Ralph</span>
                   </h1>
-                  <Image
-                    src="/consultralph.png"
-                    alt="Consult Ralph"
-                    width={160}
-                    height={160}
-                    className="w-20 h-20 sm:w-24 sm:h-24 md:w-36 md:h-36 object-contain"
-                    priority
-                  />
+                  {isVideoPlaying ? (
+                    <video
+                      src="/ralph.mp4"
+                      autoPlay
+                      loop
+                      muted
+                      playsInline
+                      className="w-20 h-20 sm:w-24 sm:h-24 md:w-36 md:h-36 object-contain rounded-lg cursor-pointer"
+                      onClick={() => setIsVideoPlaying(false)}
+                    />
+                  ) : (
+                    <Image
+                      src="/consultralph.png"
+                      alt="Consult Ralph"
+                      width={160}
+                      height={160}
+                      className="w-20 h-20 sm:w-24 sm:h-24 md:w-36 md:h-36 object-contain cursor-pointer hover:scale-105 transition-transform"
+                      priority
+                      onClick={() => setIsVideoPlaying(true)}
+                    />
+                  )}
                 </div>
                 <p className="text-base sm:text-lg text-text-muted max-w-2xl mx-auto px-2">
                   AI-powered deep research for consultants. Generate
