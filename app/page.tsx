@@ -6,6 +6,7 @@ import ConsultingResearchForm from "./components/ConsultingResearchForm";
 import ResearchResults from "./components/ResearchResults";
 import Sidebar from "./components/Sidebar";
 import GitHubCorner from "./components/GitHubCorner";
+import { SignInModal } from "./components/auth";
 import { X, Menu } from "lucide-react";
 import { DottedGlowBackground } from "@/components/ui/dotted-glow-background";
 import {
@@ -60,6 +61,9 @@ export default function Home() {
   const pollIntervalRef = useRef<NodeJS.Timeout | null>(null);
   const introVideoRef = useRef<HTMLVideoElement>(null);
   const getAccessToken = useAuthStore((state) => state.getAccessToken);
+  const showSignInModal = useAuthStore((state) => state.showSignInModal);
+  const openSignInModal = useAuthStore((state) => state.openSignInModal);
+  const closeSignInModal = useAuthStore((state) => state.closeSignInModal);
 
   const clearPolling = useCallback(() => {
     if (pollIntervalRef.current) {
@@ -611,6 +615,12 @@ export default function Home() {
           )}
         </main>
       </div>
+
+      {/* Sign In Modal */}
+      <SignInModal
+        open={showSignInModal}
+        onOpenChange={(open) => open ? openSignInModal() : closeSignInModal()}
+      />
     </div>
   );
 }
