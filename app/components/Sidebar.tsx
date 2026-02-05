@@ -22,6 +22,7 @@ import {
   Loader2,
   XCircle,
   Plus,
+  Lock,
   X,
   Menu,
 } from "lucide-react";
@@ -302,13 +303,7 @@ export default function Sidebar({
                 {canViewHistory ? (
                   <History className="w-5 h-5" />
                 ) : (
-                  <Image
-                    src="/consultralph.png"
-                    alt="Sign in"
-                    width={20}
-                    height={20}
-                    className="w-5 h-5 object-contain opacity-70"
-                  />
+                  <Lock className="w-5 h-5" />
                 )}
               </button>
             </div>
@@ -319,13 +314,7 @@ export default function Sidebar({
             {!canViewHistory ? (
               // Show sign-in prompt for Valyu mode without auth
               <div className="flex-1 flex flex-col items-center justify-center p-4 text-center">
-                <Image
-                  src="/consultralph.png"
-                  alt="Sign in"
-                  width={64}
-                  height={64}
-                  className="w-16 h-16 object-contain mb-2 opacity-70"
-                />
+                <Lock className="w-8 h-8 text-text-muted mb-2" />
                 <p className="text-sm text-text-muted">Sign in to view history</p>
                 <p className="text-xs text-text-muted mt-1">
                   Your research history will be saved when signed in
@@ -546,13 +535,7 @@ export default function Sidebar({
         <div className="flex flex-col h-full">
           {!canViewHistory ? (
             <div className="flex-1 flex flex-col items-center justify-center p-4 text-center">
-              <Image
-                src="/consultralph.png"
-                alt="Sign in"
-                width={64}
-                height={64}
-                className="w-16 h-16 object-contain mb-2 opacity-70"
-              />
+              <Lock className="w-8 h-8 text-text-muted mb-2" />
               <p className="text-sm text-text-muted">Sign in to view history</p>
               <p className="text-xs text-text-muted mt-1">
                 Your research history will be saved when signed in
