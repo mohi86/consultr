@@ -247,7 +247,9 @@ export default function Home() {
 
       {/* Discord Toast */}
       {showDiscordBanner && (
-        <div className="fixed top-4 left-20 md:left-20 z-20 bg-card border border-border rounded-lg shadow-lg p-3 flex items-center gap-3 max-w-xs animate-in slide-in-from-left">
+        <div className={`fixed top-4 left-20 z-20 bg-card border border-border rounded-lg shadow-lg p-3 flex items-center gap-3 max-w-xs animate-in slide-in-from-left transition-all duration-300 ${
+          isSidebarCollapsed ? 'md:left-20' : 'md:left-80'
+        }`}>
           <a
             href="https://discord.gg/8TCbHsSe"
             target="_blank"
