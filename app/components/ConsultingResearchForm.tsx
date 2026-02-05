@@ -116,6 +116,8 @@ export default function ConsultingResearchForm({
     e.preventDefault();
     setError(null);
 
+    console.log("Form submit - isValyuMode:", isValyuMode, "isAuthenticated:", isAuthenticated);
+
     if (!researchSubject.trim()) {
       setError("Please enter a research subject");
       return;
@@ -123,6 +125,7 @@ export default function ConsultingResearchForm({
 
     // If in Valyu mode and not authenticated, save form data and open sign-in modal
     if (isValyuMode && !isAuthenticated) {
+      console.log("Opening sign-in modal...");
       // Save form data to localStorage
       const formData = {
         researchType,
