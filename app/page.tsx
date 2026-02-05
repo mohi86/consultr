@@ -448,7 +448,7 @@ export default function Home() {
               <div className="text-center mb-6 sm:mb-8 max-w-3xl">
                 <div className="flex flex-col-reverse md:flex-row items-center md:items-end justify-center gap-2 sm:gap-3 mb-4">
                   <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold md:mb-4">
-                    <span className="text-foreground">Consult Ralph</span>
+                    <span className="text-foreground">ConsultRalph</span>
                   </h1>
                   <div className="relative group cursor-pointer" onClick={() => !isVideoPlaying && setIsVideoPlaying(true)}>
                     {/* Ralph image/video */}
