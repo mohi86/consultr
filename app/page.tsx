@@ -222,6 +222,33 @@ export default function Home() {
     cancelledRef.current = false;
   };
 
+  // Keyboard shortcuts
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      // Don't trigger shortcuts when typing in input fields
+      const target = e.target as HTMLElement;
+      if (
+        target.tagName === "INPUT" ||
+        target.tagName === "TEXTAREA" ||
+        target.isContentEditable
+      ) {
+        return;
+      }
+
+      // Left/Right arrow keys to collapse/expand sidebar (desktop only)
+      if (e.key === "ArrowLeft") {
+        e.preventDefault();
+        setIsSidebarCollapsed(true);
+      } else if (e.key === "ArrowRight") {
+        e.preventDefault();
+        setIsSidebarCollapsed(false);
+      }
+    };
+
+    document.addEventListener("keydown", handleKeyDown);
+    return () => document.removeEventListener("keydown", handleKeyDown);
+  }, []);
+
   // Cleanup on unmount
   useEffect(() => {
     return () => {

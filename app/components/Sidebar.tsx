@@ -77,6 +77,37 @@ export default function Sidebar({
   const isValyuMode = APP_MODE === "valyu";
   const canViewHistory = !isValyuMode || isAuthenticated;
 
+  // Keyboard shortcuts
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      // D key for documentation
+      if (
+        e.key.toLowerCase() === "d" &&
+        !e.metaKey &&
+        !e.ctrlKey &&
+        !e.altKey &&
+        !e.shiftKey
+      ) {
+        const target = e.target as HTMLElement;
+        if (
+          target.tagName !== "INPUT" &&
+          target.tagName !== "TEXTAREA" &&
+          !target.isContentEditable
+        ) {
+          e.preventDefault();
+          window.open(
+            "https://docs.valyu.ai/guides/deepresearch-quickstart",
+            "_blank",
+            "noopener,noreferrer"
+          );
+        }
+      }
+    };
+
+    document.addEventListener("keydown", handleKeyDown);
+    return () => document.removeEventListener("keydown", handleKeyDown);
+  }, []);
+
   // Load history on mount and when localStorage changes
   useEffect(() => {
     const loadHistory = () => {
@@ -364,6 +395,7 @@ export default function Sidebar({
         <div className="space-y-1">
           {bottomItems.map((item, index) => {
             const Icon = item.icon;
+            const isDocsLink = item.label === "Documentation";
             return (
               <a
                 key={index}
@@ -375,7 +407,14 @@ export default function Sidebar({
               >
                 <Icon className="w-5 h-5 flex-shrink-0" />
                 {!isCollapsed && (
-                  <span className="text-sm truncate">{item.label}</span>
+                  <>
+                    <span className="text-sm truncate">{item.label}</span>
+                    {isDocsLink && (
+                      <div className="flex items-center gap-1 bg-muted border border-border px-1.5 py-0.5 rounded text-xs text-muted-foreground ml-auto">
+                        <span>D</span>
+                      </div>
+                    )}
+                  </>
                 )}
               </a>
             );
@@ -403,13 +442,23 @@ export default function Sidebar({
       {/* Collapse Toggle */}
       <button
         onClick={() => setIsCollapsed(!isCollapsed)}
-        className="p-3 border-t border-border hover:bg-surface-hover transition-colors flex items-center justify-center"
+        className="p-3 border-t border-border hover:bg-surface-hover transition-colors flex items-center justify-center gap-2"
         aria-label={isCollapsed ? "Expand sidebar" : "Collapse sidebar"}
       >
         {isCollapsed ? (
-          <ChevronRight className="w-5 h-5 text-text-muted" />
+          <>
+            <ChevronRight className="w-5 h-5 text-text-muted" />
+            <div className="flex items-center gap-1 bg-muted border border-border px-1.5 py-0.5 rounded text-xs text-muted-foreground">
+              <span>→</span>
+            </div>
+          </>
         ) : (
-          <ChevronLeft className="w-5 h-5 text-text-muted" />
+          <>
+            <ChevronLeft className="w-5 h-5 text-text-muted" />
+            <div className="flex items-center gap-1 bg-muted border border-border px-1.5 py-0.5 rounded text-xs text-muted-foreground">
+              <span>←</span>
+            </div>
+          </>
         )}
       </button>
     </aside>
@@ -560,6 +609,7 @@ export default function Sidebar({
         <div className="space-y-1">
           {bottomItems.map((item, index) => {
             const Icon = item.icon;
+            const isDocsLink = item.label === "Documentation";
             return (
               <a
                 key={index}
@@ -570,6 +620,11 @@ export default function Sidebar({
               >
                 <Icon className="w-5 h-5 flex-shrink-0" />
                 <span className="text-sm truncate">{item.label}</span>
+                {isDocsLink && (
+                  <div className="flex items-center gap-1 bg-muted border border-border px-1.5 py-0.5 rounded text-xs text-muted-foreground ml-auto">
+                    <span>D</span>
+                  </div>
+                )}
               </a>
             );
           })}
