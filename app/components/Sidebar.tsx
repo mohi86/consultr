@@ -220,8 +220,14 @@ export default function Sidebar({
       <div className="p-4 border-b border-border">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <div className="p-2 bg-primary/10 rounded-lg flex-shrink-0">
-              <Briefcase className="w-5 h-5 text-primary" />
+            <div className="relative w-9 h-9 flex-shrink-0">
+              <Image
+                src="/consultralph.png"
+                alt="Consult Ralph"
+                width={36}
+                height={36}
+                className="w-full h-full object-contain"
+              />
             </div>
             {!isCollapsed && (
               <span className="font-semibold text-sm">Consulting Intel</span>
@@ -485,8 +491,14 @@ export default function Sidebar({
       <div className="p-4 border-b border-border">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <div className="p-2 bg-primary/10 rounded-lg flex-shrink-0">
-              <Briefcase className="w-5 h-5 text-primary" />
+            <div className="relative w-9 h-9 flex-shrink-0">
+              <Image
+                src="/consultralph.png"
+                alt="Consult Ralph"
+                width={36}
+                height={36}
+                className="w-full h-full object-contain"
+              />
             </div>
             <span className="font-semibold text-sm">Consulting Intel</span>
           </div>
