@@ -326,7 +326,6 @@ export default function Home() {
                         <video
                           src="/ralph.mp4"
                           autoPlay
-                          muted
                           playsInline
                           className="w-full h-full object-contain"
                           onEnded={() => setIsVideoPlaying(false)}
