@@ -319,27 +319,36 @@ export default function Home() {
                   <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold md:mb-4">
                     <span className="text-foreground">Consult Ralph</span>
                   </h1>
-                  {isVideoPlaying ? (
-                    <video
-                      src="/ralph.mp4"
-                      autoPlay
-                      loop
-                      muted
-                      playsInline
-                      className="w-20 h-20 sm:w-24 sm:h-24 md:w-36 md:h-36 object-contain rounded-lg cursor-pointer"
-                      onClick={() => setIsVideoPlaying(false)}
-                    />
-                  ) : (
-                    <Image
-                      src="/consultralph.png"
-                      alt="Consult Ralph"
-                      width={160}
-                      height={160}
-                      className="w-20 h-20 sm:w-24 sm:h-24 md:w-36 md:h-36 object-contain cursor-pointer hover:scale-105 transition-transform"
-                      priority
-                      onClick={() => setIsVideoPlaying(true)}
-                    />
-                  )}
+                  <div className="relative group">
+                    {/* Picture frame */}
+                    <div className="absolute inset-0 bg-gradient-to-br from-amber-100 via-amber-50 to-amber-100 dark:from-amber-900/30 dark:via-amber-800/20 dark:to-amber-900/30 rounded-xl shadow-2xl border-4 border-amber-200 dark:border-amber-800/50 -m-2 sm:-m-3"></div>
+                    {/* Inner shadow for depth */}
+                    <div className="absolute inset-0 rounded-xl shadow-inner -m-2 sm:-m-3 pointer-events-none"></div>
+                    {/* Content */}
+                    <div className="relative">
+                      {isVideoPlaying ? (
+                        <video
+                          src="/ralph.mp4"
+                          autoPlay
+                          loop
+                          muted
+                          playsInline
+                          className="w-20 h-20 sm:w-24 sm:h-24 md:w-36 md:h-36 object-contain cursor-pointer relative z-10"
+                          onClick={() => setIsVideoPlaying(false)}
+                        />
+                      ) : (
+                        <Image
+                          src="/consultralph.png"
+                          alt="Consult Ralph"
+                          width={160}
+                          height={160}
+                          className="w-20 h-20 sm:w-24 sm:h-24 md:w-36 md:h-36 object-contain cursor-pointer group-hover:scale-105 transition-transform relative z-10"
+                          priority
+                          onClick={() => setIsVideoPlaying(true)}
+                        />
+                      )}
+                    </div>
+                  </div>
                 </div>
                 <p className="text-base sm:text-lg text-text-muted max-w-2xl mx-auto px-2">
                   AI-powered deep research for consultants. Generate
