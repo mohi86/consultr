@@ -484,10 +484,10 @@ export default function Home() {
                   </div>
                 </div>
                 <p className="text-base sm:text-lg text-text-muted max-w-2xl mx-auto px-2">
-                  Free AI-powered deep research for consultants. Generate
+                  AI-powered deep research for consultants. Generate
                   comprehensive due diligence reports, market analyses,
                   competitive landscapes, and strategic insights in minutes.
-                  Powered by Valyu - the Search API for AI knowledge work.
+                  Powered by Valyu, the Search API for AI knowledge work.
                 </p>
               </div>
 
@@ -527,9 +527,9 @@ export default function Home() {
               </div>
 
               {/* Footer */}
-              <footer className="mt-8 sm:mt-12 text-center text-xs sm:text-sm text-text-muted px-2 space-y-1">
+              <footer className="mt-8 sm:mt-12 text-center text-xs sm:text-sm text-text-muted px-2">
                 <p>
-                  <span className="font-medium text-foreground">Free</span> deep research powered by{" "}
+                  Deepresearch powered by{" "}
                   <a
                     href="https://valyu.ai"
                     target="_blank"
@@ -538,9 +538,7 @@ export default function Home() {
                   >
                     Valyu
                   </a>
-                </p>
-                <p className="text-xs">
-                  Valyu - the Search API for AI knowledge work
+                  , the Search API for AI knowledge work
                 </p>
               </footer>
             </div>

@@ -97,6 +97,12 @@ export default function ConsultingResearchForm({
     e.preventDefault();
     setError(null);
 
+    // If in Valyu mode and not authenticated, open sign-in modal
+    if (isValyuMode && !isAuthenticated) {
+      openSignInModal();
+      return;
+    }
+
     if (!researchSubject.trim()) {
       setError("Please enter a research subject");
       return;
@@ -328,7 +334,7 @@ export default function ConsultingResearchForm({
 
       {/* Info Text */}
       <p className="text-xs sm:text-sm text-text-muted text-center px-2">
-        <span className="font-medium text-foreground">Free</span> research powered by Valyu - the Search API for AI knowledge work.
+        Research powered by Valyu, the Search API for AI knowledge work.
         Takes 5-10 minutes. You&apos;ll receive a comprehensive PDF report, data spreadsheet, and executive summary.
         Run multiple research projects at once.
       </p>

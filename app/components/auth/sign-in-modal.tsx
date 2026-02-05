@@ -77,10 +77,10 @@ export function SignInModal({ open, onOpenChange }: SignInModalProps) {
       <DialogContent className="space-y-6">
         <div className="space-y-3">
           <p className="text-center text-base font-medium text-foreground">
-            Free Deep Research powered by Valyu
+            Deep Research powered by Valyu
           </p>
           <p className="text-center text-sm text-muted-foreground">
-            Valyu is the Search API for AI knowledge work. Get free access to comprehensive research reports, market analysis, and strategic insights.
+            Valyu is the Search API for AI knowledge work. Get access to comprehensive research reports, market analysis, and strategic insights.
           </p>
         </div>
 
@@ -110,7 +110,7 @@ export function SignInModal({ open, onOpenChange }: SignInModalProps) {
         </Button>
 
         <p className="text-center text-sm text-muted-foreground">
-          Don&apos;t have an account? Create one free during sign-in.
+          Don&apos;t have an account? Create one during sign-in.
         </p>
       </DialogContent>
     </Dialog>
