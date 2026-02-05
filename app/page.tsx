@@ -342,45 +342,47 @@ export default function Home() {
                         />
                       )}
                     </div>
-                    {/* Ornate picture frame overlay */}
-                    <svg
-                      className="absolute inset-0 w-full h-full pointer-events-none"
-                      viewBox="0 0 200 200"
-                      style={{ filter: 'drop-shadow(0 10px 20px rgba(0,0,0,0.3))' }}
-                    >
-                      <defs>
-                        <linearGradient id="frameGradient" x1="0%" y1="0%" x2="100%" y2="100%">
-                          <stop offset="0%" style={{ stopColor: '#d4a574', stopOpacity: 1 }} />
-                          <stop offset="50%" style={{ stopColor: '#c19a6b', stopOpacity: 1 }} />
-                          <stop offset="100%" style={{ stopColor: '#a67c52', stopOpacity: 1 }} />
-                        </linearGradient>
-                        <linearGradient id="frameHighlight" x1="0%" y1="0%" x2="0%" y2="100%">
-                          <stop offset="0%" style={{ stopColor: '#f4e4d4', stopOpacity: 0.8 }} />
-                          <stop offset="100%" style={{ stopColor: '#c19a6b', stopOpacity: 0.2 }} />
-                        </linearGradient>
-                      </defs>
+                    {/* Ornate picture frame overlay - only shows when video is playing */}
+                    {isVideoPlaying && (
+                      <svg
+                        className="absolute inset-0 w-full h-full pointer-events-none"
+                        viewBox="0 0 200 200"
+                        style={{ filter: 'drop-shadow(0 10px 20px rgba(0,0,0,0.3))' }}
+                      >
+                        <defs>
+                          <linearGradient id="frameGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                            <stop offset="0%" style={{ stopColor: '#d4a574', stopOpacity: 1 }} />
+                            <stop offset="50%" style={{ stopColor: '#c19a6b', stopOpacity: 1 }} />
+                            <stop offset="100%" style={{ stopColor: '#a67c52', stopOpacity: 1 }} />
+                          </linearGradient>
+                          <linearGradient id="frameHighlight" x1="0%" y1="0%" x2="0%" y2="100%">
+                            <stop offset="0%" style={{ stopColor: '#f4e4d4', stopOpacity: 0.8 }} />
+                            <stop offset="100%" style={{ stopColor: '#c19a6b', stopOpacity: 0.2 }} />
+                          </linearGradient>
+                        </defs>
 
-                      {/* Outer frame border */}
-                      <rect x="2" y="2" width="196" height="196" fill="none" stroke="url(#frameGradient)" strokeWidth="16" rx="4" />
+                        {/* Outer frame border */}
+                        <rect x="2" y="2" width="196" height="196" fill="none" stroke="url(#frameGradient)" strokeWidth="16" rx="4" />
 
-                      {/* Inner decorative border */}
-                      <rect x="10" y="10" width="180" height="180" fill="none" stroke="url(#frameGradient)" strokeWidth="3" rx="2" />
+                        {/* Inner decorative border */}
+                        <rect x="10" y="10" width="180" height="180" fill="none" stroke="url(#frameGradient)" strokeWidth="3" rx="2" />
 
-                      {/* Corner ornaments */}
-                      <circle cx="20" cy="20" r="4" fill="url(#frameHighlight)" />
-                      <circle cx="180" cy="20" r="4" fill="url(#frameHighlight)" />
-                      <circle cx="20" cy="180" r="4" fill="url(#frameHighlight)" />
-                      <circle cx="180" cy="180" r="4" fill="url(#frameHighlight)" />
+                        {/* Corner ornaments */}
+                        <circle cx="20" cy="20" r="4" fill="url(#frameHighlight)" />
+                        <circle cx="180" cy="20" r="4" fill="url(#frameHighlight)" />
+                        <circle cx="20" cy="180" r="4" fill="url(#frameHighlight)" />
+                        <circle cx="180" cy="180" r="4" fill="url(#frameHighlight)" />
 
-                      {/* Side ornaments */}
-                      <circle cx="100" cy="10" r="3" fill="url(#frameHighlight)" />
-                      <circle cx="100" cy="190" r="3" fill="url(#frameHighlight)" />
-                      <circle cx="10" cy="100" r="3" fill="url(#frameHighlight)" />
-                      <circle cx="190" cy="100" r="3" fill="url(#frameHighlight)" />
+                        {/* Side ornaments */}
+                        <circle cx="100" cy="10" r="3" fill="url(#frameHighlight)" />
+                        <circle cx="100" cy="190" r="3" fill="url(#frameHighlight)" />
+                        <circle cx="10" cy="100" r="3" fill="url(#frameHighlight)" />
+                        <circle cx="190" cy="100" r="3" fill="url(#frameHighlight)" />
 
-                      {/* Inner shadow effect */}
-                      <rect x="18" y="18" width="164" height="164" fill="none" stroke="#00000020" strokeWidth="1" rx="2" />
-                    </svg>
+                        {/* Inner shadow effect */}
+                        <rect x="18" y="18" width="164" height="164" fill="none" stroke="#00000020" strokeWidth="1" rx="2" />
+                      </svg>
+                    )}
                   </div>
                 </div>
                 <p className="text-base sm:text-lg text-text-muted max-w-2xl mx-auto px-2">
