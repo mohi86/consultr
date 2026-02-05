@@ -502,8 +502,8 @@ export default function Home() {
                 </div>
                 <p className="text-base sm:text-lg text-text-muted max-w-2xl mx-auto px-2">
                   AI-powered deep research for consultants. Generate
-                  comprehensive due diligence reports, market analyses,
-                  competitive landscapes, and strategic insights in minutes.
+                  comprehensive reports with PowerPoint decks, Excel spreadsheets, and Word documents
+                  in 5-10 minutes. Due diligence, market analyses, competitive landscapes, and strategic insights.
                   Powered by Valyu, the Search API for AI knowledge work.
                 </p>
               </div>
@@ -517,7 +517,7 @@ export default function Home() {
               </div>
 
               {/* Features */}
-              <div className="mt-8 sm:mt-12 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 sm:gap-6 max-w-4xl w-full px-2">
+              <div className="mt-8 sm:mt-12 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4 sm:gap-6 max-w-5xl w-full px-2">
                 <div className="card text-center">
                   <div className="text-3xl sm:text-4xl mb-2">📊</div>
                   <h3 className="font-semibold text-sm sm:text-base mb-1">Due Diligence</h3>
@@ -534,11 +534,18 @@ export default function Home() {
                     players
                   </p>
                 </div>
-                <div className="card text-center sm:col-span-2 md:col-span-1">
+                <div className="card text-center">
                   <div className="text-3xl sm:text-4xl mb-2">⚔️</div>
                   <h3 className="font-semibold text-sm sm:text-base mb-1">Competitive Intel</h3>
                   <p className="text-xs sm:text-sm text-text-muted">
                     Competitor mapping, SWOT analysis, and strategic positioning
+                  </p>
+                </div>
+                <div className="card text-center">
+                  <div className="text-3xl sm:text-4xl mb-2">📑</div>
+                  <h3 className="font-semibold text-sm sm:text-base mb-1">Client-Ready Deliverables</h3>
+                  <p className="text-xs sm:text-sm text-text-muted">
+                    PowerPoint decks, Excel spreadsheets, Word docs, and PDF reports
                   </p>
                 </div>
               </div>

@@ -335,7 +335,7 @@ export default function ConsultingResearchForm({
       {/* Info Text */}
       <p className="text-xs sm:text-sm text-text-muted text-center px-2">
         Research powered by Valyu, the Search API for AI knowledge work.
-        Takes 5-10 minutes. You&apos;ll receive a comprehensive PDF report, data spreadsheet, and executive summary.
+        Takes 5-10 minutes. You&apos;ll receive PowerPoint slides, Excel spreadsheet, Word document, and PDF report.
         Run multiple research projects at once.
       </p>
     </form>
