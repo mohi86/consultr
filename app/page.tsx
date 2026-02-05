@@ -253,9 +253,12 @@ export default function Home() {
     return () => document.removeEventListener("keydown", handleKeyDown);
   }, []);
 
-  // Always show intro for testing
+  // Check if first visit
   useEffect(() => {
-    setShowIntro(true);
+    const hasSeenIntro = localStorage.getItem("consultralph_intro_seen");
+    if (!hasSeenIntro) {
+      setShowIntro(true);
+    }
   }, []);
 
   // Try to enable audio after video starts playing
@@ -320,12 +323,12 @@ export default function Home() {
             />
             {/* Play button overlay */}
             {!introStarted && (
-              <div className="absolute inset-0 flex items-center justify-center">
+              <div className="absolute inset-0 flex items-center justify-center px-4">
                 <button
                   onClick={handleIntroStart}
-                  className="bg-white/90 hover:bg-white text-black px-8 py-4 rounded-full text-xl font-semibold shadow-2xl transition-all hover:scale-105 flex items-center gap-3"
+                  className="bg-white/90 hover:bg-white active:bg-white text-black px-6 py-3 md:px-8 md:py-4 rounded-full text-lg md:text-xl font-semibold shadow-2xl transition-all hover:scale-105 active:scale-95 flex items-center gap-2 md:gap-3"
                 >
-                  <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
+                  <svg className="w-5 h-5 md:w-6 md:h-6" fill="currentColor" viewBox="0 0 24 24">
                     <path d="M8 5v14l11-7z" />
                   </svg>
                   Play with sound
