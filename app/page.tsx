@@ -222,6 +222,33 @@ export default function Home() {
     cancelledRef.current = false;
   };
 
+  // Keyboard shortcuts
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      // Don't trigger shortcuts when typing in input fields
+      const target = e.target as HTMLElement;
+      if (
+        target.tagName === "INPUT" ||
+        target.tagName === "TEXTAREA" ||
+        target.isContentEditable
+      ) {
+        return;
+      }
+
+      // Left/Right arrow keys to collapse/expand sidebar (desktop only)
+      if (e.key === "ArrowLeft") {
+        e.preventDefault();
+        setIsSidebarCollapsed(true);
+      } else if (e.key === "ArrowRight") {
+        e.preventDefault();
+        setIsSidebarCollapsed(false);
+      }
+    };
+
+    document.addEventListener("keydown", handleKeyDown);
+    return () => document.removeEventListener("keydown", handleKeyDown);
+  }, []);
+
   // Cleanup on unmount
   useEffect(() => {
     return () => {
@@ -247,7 +274,9 @@ export default function Home() {
 
       {/* Discord Toast */}
       {showDiscordBanner && (
-        <div className="fixed top-4 left-20 md:left-20 z-20 bg-card border border-border rounded-lg shadow-lg p-3 flex items-center gap-3 max-w-xs animate-in slide-in-from-left">
+        <div className={`fixed top-4 left-20 z-20 bg-card border border-border rounded-lg shadow-lg p-3 flex items-center gap-3 max-w-xs animate-in slide-in-from-left transition-all duration-300 ${
+          isSidebarCollapsed ? 'md:left-20' : 'md:left-80'
+        }`}>
           <a
             href="https://discord.gg/8TCbHsSe"
             target="_blank"
