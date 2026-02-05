@@ -316,7 +316,7 @@ export default function ConsultingResearchForm({
       {/* Submit Button */}
       <button
         type="submit"
-        disabled={isSubmitting || isResearching || !researchSubject.trim()}
+        disabled={isSubmitting || isResearching || (isAuthenticated && !researchSubject.trim())}
         className="btn-primary w-full flex items-center justify-center gap-2 min-h-[48px] sm:min-h-[52px] text-base sm:text-lg"
       >
         {isSubmitting ? (

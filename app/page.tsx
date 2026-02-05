@@ -413,17 +413,17 @@ export default function Home() {
           {/* Dotted Glow Background */}
           <DottedGlowBackground
             className="pointer-events-none"
-            opacity={0.3}
-            gap={14}
-            radius={1.8}
-            colorLightVar="--color-neutral-400"
-            glowColorLightVar="--color-primary"
-            colorDarkVar="--color-neutral-600"
-            glowColorDarkVar="--color-primary"
+            opacity={0.15}
+            gap={16}
+            radius={1.5}
+            colorLightVar="--color-neutral-300"
+            glowColorLightVar="--color-neutral-400"
+            colorDarkVar="--color-neutral-700"
+            glowColorDarkVar="--color-neutral-600"
             backgroundOpacity={0}
-            speedMin={0.2}
-            speedMax={0.8}
-            speedScale={0.8}
+            speedMin={0.15}
+            speedMax={0.6}
+            speedScale={0.6}
           />
 
           {!showResults ? (
