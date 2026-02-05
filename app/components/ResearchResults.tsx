@@ -187,7 +187,7 @@ export default function ResearchResults({
     : 0;
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4 sm:space-y-6">
       {/* File Viewer Modal */}
       <FileViewer
         url={viewer.url}
@@ -202,7 +202,7 @@ export default function ResearchResults({
         <div className="card">
           <div className="flex flex-col items-center text-center">
             {/* Animated Loading Ring */}
-            <div className="relative w-24 h-24 mb-4">
+            <div className="relative w-20 h-20 sm:w-24 sm:h-24 mb-4">
               <div className="absolute inset-0 border-4 border-primary/20 rounded-full" />
               <div
                 className="absolute inset-0 border-4 border-primary rounded-full pulse-ring"
@@ -211,24 +211,24 @@ export default function ResearchResults({
                 }}
               />
               <div className="absolute inset-0 flex items-center justify-center">
-                <Clock className="w-10 h-10 text-primary animate-pulse" />
+                <Clock className="w-8 h-8 sm:w-10 sm:h-10 text-primary animate-pulse" />
               </div>
             </div>
 
-            <h2 className="text-xl font-semibold mb-2">
+            <h2 className="text-lg sm:text-xl font-semibold mb-2">
               {getStatusMessage(result?.status || "queued")}
             </h2>
 
             {/* Progress */}
             {result?.progress && (
-              <div className="w-full max-w-md mb-4">
-                <div className="flex justify-between text-sm text-text-muted mb-1">
+              <div className="w-full max-w-md mb-4 px-4">
+                <div className="flex justify-between text-xs sm:text-sm text-text-muted mb-1">
                   <span>
                     Step {result.progress.current_step} of {result.progress.total_steps}
                   </span>
                   <span>{progressPercent}%</span>
                 </div>
-                <div className="h-2 bg-surface rounded-full overflow-hidden">
+                <div className="h-2 sm:h-2.5 bg-surface rounded-full overflow-hidden">
                   <div
                     className="h-full bg-primary progress-bar transition-all duration-500"
                     style={{ width: `${progressPercent}%` }}
@@ -238,7 +238,7 @@ export default function ResearchResults({
             )}
 
             {/* Research Steps */}
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 w-full mt-4">
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4 w-full mt-4 px-2">
               {researchSteps.map((step, index) => {
                 const Icon = step.icon;
                 const currentStep = result?.progress?.current_step || 0;
@@ -248,7 +248,7 @@ export default function ResearchResults({
                 return (
                   <div
                     key={index}
-                    className={`flex flex-col items-center p-3 rounded-lg transition-colors ${
+                    className={`flex flex-col items-center p-2 sm:p-3 rounded-lg transition-colors ${
                       isActive
                         ? "bg-primary/10 text-primary"
                         : isCompleted
@@ -257,9 +257,9 @@ export default function ResearchResults({
                     }`}
                   >
                     <Icon
-                      className={`w-6 h-6 mb-1 ${isActive ? "animate-pulse" : ""}`}
+                      className={`w-5 h-5 sm:w-6 sm:h-6 mb-1 ${isActive ? "animate-pulse" : ""}`}
                     />
-                    <span className="text-xs text-center">{step.label}</span>
+                    <span className="text-[10px] sm:text-xs text-center leading-tight">{step.label}</span>
                   </div>
                 );
               })}
@@ -269,7 +269,7 @@ export default function ResearchResults({
             <button
               onClick={handleCancel}
               disabled={isCancelling}
-              className="btn-secondary mt-6 flex items-center gap-2"
+              className="btn-secondary mt-6 flex items-center gap-2 min-h-[44px]"
             >
               {isCancelling ? (
                 <>
@@ -285,9 +285,9 @@ export default function ResearchResults({
             </button>
 
             {/* Expected Deliverables */}
-            <div className="mt-6 p-4 bg-surface rounded-lg w-full max-w-md">
-              <h3 className="font-medium mb-2">You&apos;ll receive:</h3>
-              <ul className="text-sm text-text-muted space-y-1">
+            <div className="mt-6 p-3 sm:p-4 bg-surface rounded-lg w-full max-w-md">
+              <h3 className="font-medium text-sm sm:text-base mb-2">You&apos;ll receive:</h3>
+              <ul className="text-xs sm:text-sm text-text-muted space-y-1">
                 <li>• Comprehensive PDF research report</li>
                 <li>• Data spreadsheet with key metrics</li>
                 <li>• Executive summary document</li>
@@ -303,19 +303,19 @@ export default function ResearchResults({
         <>
           {/* Success Header */}
           <div className="card bg-success/5 border-success/30">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-3">
-                <CheckCircle className="w-8 h-8 text-success" />
+            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+              <div className="flex items-start gap-3">
+                <CheckCircle className="w-6 h-6 sm:w-8 sm:h-8 text-success flex-shrink-0" />
                 <div>
-                  <h2 className="text-lg font-semibold">Research Complete</h2>
-                  <p className="text-sm text-text-muted">
+                  <h2 className="text-base sm:text-lg font-semibold">Research Complete</h2>
+                  <p className="text-xs sm:text-sm text-text-muted">
                     Your deliverables are ready to view and download
                   </p>
                 </div>
               </div>
-              <button onClick={onReset} className="btn-secondary flex items-center gap-2">
+              <button onClick={onReset} className="btn-secondary flex items-center gap-2 w-full sm:w-auto min-h-[44px]">
                 <RefreshCw className="w-4 h-4" />
-                New Research
+                <span>New Research</span>
               </button>
             </div>
           </div>
@@ -323,61 +323,61 @@ export default function ResearchResults({
           {/* Deliverables */}
           {(result.deliverables?.length || result.pdf_url) && (
             <div className="card">
-              <h3 className="font-semibold mb-4 flex items-center gap-2">
-                <Download className="w-5 h-5" />
+              <h3 className="font-semibold text-base sm:text-lg mb-3 sm:mb-4 flex items-center gap-2">
+                <Download className="w-4 h-4 sm:w-5 sm:h-5" />
                 Deliverables
               </h3>
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
                 {result.pdf_url && (
-                  <div className="p-4 bg-surface rounded-lg border border-border">
+                  <div className="p-3 sm:p-4 bg-surface rounded-lg border border-border">
                     <div className="flex items-center gap-3 mb-3">
                       {getFileIcon("pdf")}
                       <div className="flex-1 min-w-0">
-                        <div className="font-medium">Research Report</div>
+                        <div className="font-medium text-sm sm:text-base">Research Report</div>
                         <div className="text-xs text-text-muted">PDF Document</div>
                       </div>
                     </div>
-                    <div className="flex gap-2">
+                    <div className="flex flex-col sm:flex-row gap-2">
                       <button
                         onClick={() => handleView(result.pdf_url!, "pdf", "Research Report")}
-                        className="flex-1 flex items-center justify-center gap-2 px-3 py-2 bg-primary/10 hover:bg-primary/20 text-primary rounded-lg transition-colors text-sm font-medium"
+                        className="flex-1 flex items-center justify-center gap-2 px-3 py-2.5 bg-primary/10 hover:bg-primary/20 text-primary rounded-lg transition-all active:scale-95 text-sm font-medium min-h-[44px]"
                       >
                         <Eye className="w-4 h-4" />
-                        View
+                        <span>View</span>
                       </button>
                       <button
                         onClick={() => handleDownload(result.pdf_url!, "research-report.pdf")}
                         disabled={isDownloading === "research-report.pdf"}
-                        className="flex-1 flex items-center justify-center gap-2 px-3 py-2 bg-surface-hover hover:bg-border rounded-lg transition-colors text-sm font-medium"
+                        className="flex-1 flex items-center justify-center gap-2 px-3 py-2.5 bg-surface-hover hover:bg-border rounded-lg transition-all active:scale-95 text-sm font-medium min-h-[44px]"
                       >
                         {isDownloading === "research-report.pdf" ? (
                           <Loader2 className="w-4 h-4 animate-spin" />
                         ) : (
                           <Download className="w-4 h-4" />
                         )}
-                        Download
+                        <span>Download</span>
                       </button>
                     </div>
                   </div>
                 )}
                 {result.deliverables?.map((deliverable, index) => (
-                  <div key={index} className="p-4 bg-surface rounded-lg border border-border">
+                  <div key={index} className="p-3 sm:p-4 bg-surface rounded-lg border border-border">
                     <div className="flex items-center gap-3 mb-3">
                       {getFileIcon(deliverable.type)}
                       <div className="flex-1 min-w-0">
-                        <div className="font-medium">{getFileLabel(deliverable.type)}</div>
+                        <div className="font-medium text-sm sm:text-base">{getFileLabel(deliverable.type)}</div>
                         <div className="text-xs text-text-muted">
                           {deliverable.type.toUpperCase()} File
                         </div>
                       </div>
                     </div>
-                    <div className="flex gap-2">
+                    <div className="flex flex-col sm:flex-row gap-2">
                       <button
                         onClick={() => handleView(deliverable.url, deliverable.type, getFileLabel(deliverable.type))}
-                        className="flex-1 flex items-center justify-center gap-2 px-3 py-2 bg-primary/10 hover:bg-primary/20 text-primary rounded-lg transition-colors text-sm font-medium"
+                        className="flex-1 flex items-center justify-center gap-2 px-3 py-2.5 bg-primary/10 hover:bg-primary/20 text-primary rounded-lg transition-all active:scale-95 text-sm font-medium min-h-[44px]"
                       >
                         <Eye className="w-4 h-4" />
-                        View
+                        <span>View</span>
                       </button>
                       <button
                         onClick={() =>
@@ -387,14 +387,14 @@ export default function ResearchResults({
                           )
                         }
                         disabled={isDownloading === `${deliverable.title}.${deliverable.type}`}
-                        className="flex-1 flex items-center justify-center gap-2 px-3 py-2 bg-surface-hover hover:bg-border rounded-lg transition-colors text-sm font-medium"
+                        className="flex-1 flex items-center justify-center gap-2 px-3 py-2.5 bg-surface-hover hover:bg-border rounded-lg transition-all active:scale-95 text-sm font-medium min-h-[44px]"
                       >
                         {isDownloading === `${deliverable.title}.${deliverable.type}` ? (
                           <Loader2 className="w-4 h-4 animate-spin" />
                         ) : (
                           <Download className="w-4 h-4" />
                         )}
-                        Download
+                        <span>Download</span>
                       </button>
                     </div>
                   </div>
@@ -406,8 +406,8 @@ export default function ResearchResults({
           {/* Research Output */}
           {result.output && (
             <div className="card">
-              <h3 className="font-semibold mb-4">Research Findings</h3>
-              <div className="prose prose-sm max-w-none">
+              <h3 className="font-semibold text-base sm:text-lg mb-3 sm:mb-4">Research Findings</h3>
+              <div className="prose prose-sm sm:prose-base max-w-none">
                 <ReactMarkdown
                   remarkPlugins={[remarkGfm]}
                   components={{
@@ -433,8 +433,8 @@ export default function ResearchResults({
           {/* Sources */}
           {result.sources && result.sources.length > 0 && (
             <div className="card">
-              <h3 className="font-semibold mb-4">Sources ({result.sources.length})</h3>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+              <h3 className="font-semibold text-base sm:text-lg mb-3 sm:mb-4">Sources ({result.sources.length})</h3>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 sm:gap-3">
                 {result.sources.map((source, index) => {
                   let domain = "";
                   try {
@@ -478,31 +478,31 @@ export default function ResearchResults({
           {/* Usage Stats */}
           {result.usage && (
             <div className="card">
-              <h3 className="font-semibold mb-4">Research Metrics</h3>
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+              <h3 className="font-semibold text-base sm:text-lg mb-3 sm:mb-4">Research Metrics</h3>
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4">
                 <div className="text-center p-3 bg-surface rounded-lg">
-                  <div className="text-2xl font-bold text-primary">
+                  <div className="text-xl sm:text-2xl font-bold text-primary">
                     {result.usage.search_units}
                   </div>
-                  <div className="text-xs text-text-muted">Search Units</div>
+                  <div className="text-[10px] sm:text-xs text-text-muted">Search Units</div>
                 </div>
                 <div className="text-center p-3 bg-surface rounded-lg">
-                  <div className="text-2xl font-bold text-primary">
+                  <div className="text-xl sm:text-2xl font-bold text-primary">
                     {result.usage.ai_units}
                   </div>
-                  <div className="text-xs text-text-muted">AI Units</div>
+                  <div className="text-[10px] sm:text-xs text-text-muted">AI Units</div>
                 </div>
                 <div className="text-center p-3 bg-surface rounded-lg">
-                  <div className="text-2xl font-bold text-primary">
+                  <div className="text-xl sm:text-2xl font-bold text-primary">
                     {result.usage.compute_units}
                   </div>
-                  <div className="text-xs text-text-muted">Compute Units</div>
+                  <div className="text-[10px] sm:text-xs text-text-muted">Compute Units</div>
                 </div>
                 <div className="text-center p-3 bg-surface rounded-lg">
-                  <div className="text-2xl font-bold text-accent">
+                  <div className="text-xl sm:text-2xl font-bold text-accent">
                     ${result.usage.total_cost.toFixed(2)}
                   </div>
-                  <div className="text-xs text-text-muted">Total Cost</div>
+                  <div className="text-[10px] sm:text-xs text-text-muted">Total Cost</div>
                 </div>
               </div>
             </div>
@@ -513,19 +513,19 @@ export default function ResearchResults({
       {/* Failed State */}
       {isFailed && (
         <div className="card bg-error/5 border-error/30">
-          <div className="flex flex-col items-center text-center py-8">
-            <XCircle className="w-16 h-16 text-error mb-4" />
-            <h2 className="text-xl font-semibold mb-2">
+          <div className="flex flex-col items-center text-center py-6 sm:py-8 px-4">
+            <XCircle className="w-12 h-12 sm:w-16 sm:h-16 text-error mb-4" />
+            <h2 className="text-lg sm:text-xl font-semibold mb-2">
               {result?.status === "cancelled"
                 ? "Research Cancelled"
                 : "Research Failed"}
             </h2>
-            <p className="text-text-muted mb-6">
+            <p className="text-sm sm:text-base text-text-muted mb-6 max-w-md">
               {result?.error || "An unexpected error occurred during research."}
             </p>
-            <button onClick={onReset} className="btn-primary flex items-center gap-2">
+            <button onClick={onReset} className="btn-primary flex items-center gap-2 min-h-[44px]">
               <RefreshCw className="w-4 h-4" />
-              Try Again
+              <span>Try Again</span>
             </button>
           </div>
         </div>

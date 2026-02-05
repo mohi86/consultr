@@ -7,7 +7,7 @@ import ResearchResults from "./components/ResearchResults";
 import Sidebar from "./components/Sidebar";
 import GitHubCorner from "./components/GitHubCorner";
 import { SignInPanel } from "./components/auth";
-import { Briefcase, X } from "lucide-react";
+import { Briefcase, X, Menu } from "lucide-react";
 import {
   saveToHistory,
   updateHistoryStatus,
@@ -51,6 +51,7 @@ export default function Home() {
   const [currentResearchTitle, setCurrentResearchTitle] = useState<string>("");
   const [showDiscordBanner, setShowDiscordBanner] = useState(true);
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(true);
+  const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
 
   const cancelledRef = useRef(false);
   const pollIntervalRef = useRef<NodeJS.Timeout | null>(null);
@@ -235,9 +236,18 @@ export default function Home() {
       <GitHubCorner />
       <SignInPanel sidebarCollapsed={isSidebarCollapsed} />
 
+      {/* Mobile Menu Button */}
+      <button
+        onClick={() => setIsMobileSidebarOpen(!isMobileSidebarOpen)}
+        className="fixed top-4 left-4 z-30 md:hidden p-3 bg-surface border border-border rounded-lg shadow-lg hover:bg-surface-hover transition-all active:scale-95"
+        aria-label="Toggle menu"
+      >
+        <Menu className="w-5 h-5 text-foreground" />
+      </button>
+
       {/* Discord Toast */}
       {showDiscordBanner && (
-        <div className="fixed top-4 left-4 md:left-20 z-50 bg-card border border-border rounded-lg shadow-lg p-3 flex items-center gap-3 max-w-xs animate-in slide-in-from-left">
+        <div className="fixed top-4 left-20 md:left-20 z-20 bg-card border border-border rounded-lg shadow-lg p-3 flex items-center gap-3 max-w-xs animate-in slide-in-from-left">
           <a
             href="https://discord.gg/8TCbHsSe"
             target="_blank"
@@ -264,17 +274,19 @@ export default function Home() {
           currentResearchId={currentTaskId}
           isCollapsed={isSidebarCollapsed}
           onCollapsedChange={setIsSidebarCollapsed}
+          mobileOpen={isMobileSidebarOpen}
+          onMobileToggle={() => setIsMobileSidebarOpen(!isMobileSidebarOpen)}
         />
 
         {/* Main Content */}
         <main className="flex-1 min-h-screen">
           {!showResults ? (
             // Homepage layout
-            <div className="flex flex-col items-center justify-center min-h-screen px-4 py-12">
+            <div className="flex flex-col items-center justify-center min-h-screen px-4 sm:px-6 py-12 sm:py-16">
               {/* Header */}
-              <div className="text-center mb-8 max-w-3xl">
-                <div className="flex flex-col-reverse md:flex-row items-center md:items-end justify-center gap-2 mb-4">
-                  <h1 className="text-4xl md:text-5xl font-bold md:mb-4">
+              <div className="text-center mb-6 sm:mb-8 max-w-3xl">
+                <div className="flex flex-col-reverse md:flex-row items-center md:items-end justify-center gap-2 sm:gap-3 mb-4">
+                  <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold md:mb-4">
                     <span className="text-foreground">Consult Ralph</span>
                   </h1>
                   <Image
@@ -282,11 +294,11 @@ export default function Home() {
                     alt="Consult Ralph"
                     width={160}
                     height={160}
-                    className="w-24 h-24 md:w-36 md:h-36 object-contain"
+                    className="w-20 h-20 sm:w-24 sm:h-24 md:w-36 md:h-36 object-contain"
                     priority
                   />
                 </div>
-                <p className="text-lg text-text-muted max-w-2xl mx-auto">
+                <p className="text-base sm:text-lg text-text-muted max-w-2xl mx-auto px-2">
                   AI-powered deep research for consultants. Generate
                   comprehensive due diligence reports, market analyses,
                   competitive landscapes, and strategic insights in minutes.
@@ -294,7 +306,7 @@ export default function Home() {
               </div>
 
               {/* Research Form */}
-              <div className="w-full max-w-2xl">
+              <div className="w-full max-w-2xl px-2">
                 <ConsultingResearchForm
                   onTaskCreated={handleTaskCreated}
                   isResearching={isResearching}
@@ -302,34 +314,34 @@ export default function Home() {
               </div>
 
               {/* Features */}
-              <div className="mt-12 grid grid-cols-1 md:grid-cols-3 gap-6 max-w-4xl w-full">
+              <div className="mt-8 sm:mt-12 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 sm:gap-6 max-w-4xl w-full px-2">
                 <div className="card text-center">
-                  <div className="text-3xl mb-2">📊</div>
-                  <h3 className="font-semibold mb-1">Due Diligence</h3>
-                  <p className="text-sm text-text-muted">
+                  <div className="text-3xl sm:text-4xl mb-2">📊</div>
+                  <h3 className="font-semibold text-sm sm:text-base mb-1">Due Diligence</h3>
+                  <p className="text-xs sm:text-sm text-text-muted">
                     Comprehensive company research with financials, risks, and
                     competitive positioning
                   </p>
                 </div>
                 <div className="card text-center">
-                  <div className="text-3xl mb-2">🎯</div>
-                  <h3 className="font-semibold mb-1">Market Analysis</h3>
-                  <p className="text-sm text-text-muted">
+                  <div className="text-3xl sm:text-4xl mb-2">🎯</div>
+                  <h3 className="font-semibold text-sm sm:text-base mb-1">Market Analysis</h3>
+                  <p className="text-xs sm:text-sm text-text-muted">
                     TAM/SAM/SOM sizing, industry trends, growth drivers, and key
                     players
                   </p>
                 </div>
-                <div className="card text-center">
-                  <div className="text-3xl mb-2">⚔️</div>
-                  <h3 className="font-semibold mb-1">Competitive Intel</h3>
-                  <p className="text-sm text-text-muted">
+                <div className="card text-center sm:col-span-2 md:col-span-1">
+                  <div className="text-3xl sm:text-4xl mb-2">⚔️</div>
+                  <h3 className="font-semibold text-sm sm:text-base mb-1">Competitive Intel</h3>
+                  <p className="text-xs sm:text-sm text-text-muted">
                     Competitor mapping, SWOT analysis, and strategic positioning
                   </p>
                 </div>
               </div>
 
               {/* Footer */}
-              <footer className="mt-12 text-center text-sm text-text-muted">
+              <footer className="mt-8 sm:mt-12 text-center text-xs sm:text-sm text-text-muted px-2">
                 <p>
                   Powered by{" "}
                   <a
@@ -345,19 +357,19 @@ export default function Home() {
             </div>
           ) : (
             // Results layout
-            <div className="p-4 md:p-8">
+            <div className="p-4 sm:p-6 md:p-8">
               {/* Compact Header */}
-              <div className="flex items-center justify-between mb-6">
-                <div className="flex items-center gap-3">
+              <div className="flex items-center justify-between mb-4 sm:mb-6">
+                <div className="flex items-center gap-2 sm:gap-3">
                   <div className="p-2 bg-primary/10 rounded-lg">
-                    <Briefcase className="w-6 h-6 text-primary" />
+                    <Briefcase className="w-5 h-5 sm:w-6 sm:h-6 text-primary" />
                   </div>
                   <div>
-                    <h1 className="text-xl font-bold">
+                    <h1 className="text-lg sm:text-xl font-bold">
                       <span className="gradient-text">Consulting Research</span>
                     </h1>
                     {currentResearchTitle && (
-                      <p className="text-sm text-text-muted">
+                      <p className="text-xs sm:text-sm text-text-muted">
                         {currentResearchTitle}
                       </p>
                     )}
