@@ -147,7 +147,7 @@ export async function POST(request: NextRequest) {
     // Valyu mode requires authentication
     if (!selfHosted && !accessToken) {
       return NextResponse.json(
-        { error: "Please sign in to start research", requiresReauth: true },
+        { error: "Sign in for free to start deepresearch", requiresReauth: true },
         { status: 401 }
       );
     }
