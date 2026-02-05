@@ -500,11 +500,14 @@ export default function Home() {
                     )}
                   </div>
                 </div>
-                <p className="text-base sm:text-lg text-text-muted max-w-2xl mx-auto px-2">
-                  AI-powered deep research for consultants. Generate
-                  comprehensive reports with PowerPoint decks, Excel spreadsheets, and Word documents
-                  in 5-10 minutes. Due diligence, market analyses, competitive landscapes, and strategic insights.
-                  Powered by Valyu, the Search API for AI knowledge work.
+                <p className="text-base sm:text-lg text-text-muted max-w-2xl mx-auto px-2 leading-relaxed">
+                  AI-powered deep research for consultants.
+                  <br className="hidden sm:block" />
+                  Generate comprehensive reports in 5-10 minutes with PowerPoint decks, Excel spreadsheets, and Word documents.
+                  <br className="hidden sm:block" />
+                  <span className="block mt-2">
+                    Powered by Valyu, the Search API for AI knowledge work.
+                  </span>
                 </p>
               </div>
 
