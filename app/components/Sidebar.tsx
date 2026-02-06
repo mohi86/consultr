@@ -27,8 +27,10 @@ import {
 import { ResearchHistoryItem, getResearchHistory, removeFromHistory, clearHistory } from "@/app/lib/researchHistory";
 import { useAuthStore } from "@/app/stores/auth-store";
 import { useThemeStore } from "@/app/stores/theme-store";
+import EnterpriseContactModal from "./EnterpriseContactModal";
 
 const APP_MODE = process.env.NEXT_PUBLIC_APP_MODE || "self-hosted";
+const IS_ENTERPRISE = process.env.NEXT_PUBLIC_ENTERPRISE === "true";
 
 interface SidebarProps {
   onSelectHistory?: (item: ResearchHistoryItem) => void;
@@ -63,6 +65,7 @@ export default function Sidebar({
     onCollapsedChange?.(value);
   };
   const [history, setHistory] = useState<ResearchHistoryItem[]>([]);
+  const [showEnterpriseModal, setShowEnterpriseModal] = useState(false);
 
   const { isAuthenticated, openSignInModal } = useAuthStore();
   const { theme, toggleTheme } = useThemeStore();
@@ -437,6 +440,19 @@ export default function Sidebar({
               </a>
             );
           })}
+          {/* Enterprise */}
+          {IS_ENTERPRISE && (
+            <button
+              onClick={() => setShowEnterpriseModal(true)}
+              className="w-full flex items-center gap-3 p-3 rounded-lg hover:bg-surface-hover transition-colors text-text-muted text-left"
+              title={isCollapsed ? "Enterprise Solutions" : undefined}
+            >
+              <Building2 className="w-5 h-5 flex-shrink-0" />
+              {!isCollapsed && (
+                <span className="text-sm truncate">Enterprise Solutions</span>
+              )}
+            </button>
+          )}
           {/* Theme Toggle */}
           <button
             onClick={toggleTheme}
@@ -652,6 +668,19 @@ export default function Sidebar({
               </a>
             );
           })}
+          {/* Enterprise */}
+          {IS_ENTERPRISE && (
+            <button
+              onClick={() => {
+                onMobileToggle?.();
+                setShowEnterpriseModal(true);
+              }}
+              className="w-full flex items-center gap-3 p-3 rounded-lg hover:bg-surface-hover transition-colors text-text-muted text-left"
+            >
+              <Building2 className="w-5 h-5 flex-shrink-0" />
+              <span className="text-sm truncate">Enterprise Solutions</span>
+            </button>
+          )}
           <button
             onClick={toggleTheme}
             className="w-full flex items-center gap-3 p-3 rounded-lg hover:bg-surface-hover transition-colors text-text-muted text-left"
@@ -668,6 +697,12 @@ export default function Sidebar({
         </div>
       </div>
     </aside>
+
+    {/* Enterprise Contact Modal */}
+    <EnterpriseContactModal
+      open={showEnterpriseModal}
+      onClose={() => setShowEnterpriseModal(false)}
+    />
   </>
   );
 }
