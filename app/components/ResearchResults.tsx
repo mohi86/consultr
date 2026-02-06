@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useMemo } from "react";
+import dynamic from "next/dynamic";
 import { marked } from "marked";
 import {
   CheckCircle,
@@ -10,17 +11,26 @@ import {
   File,
   Download,
   ExternalLink,
+  ChevronDown,
+  ChevronUp,
   Loader2,
   RefreshCw,
   Globe,
   BookOpen,
   Eye,
-  ChevronDown,
-  ChevronUp,
   Presentation,
 } from "lucide-react";
-import FileViewer from "./FileViewer";
 import ResearchActivityFeed from "./ResearchActivityFeed";
+
+// Lazy-load FileViewer to avoid bundling papaparse + xlsx eagerly
+const FileViewer = dynamic(() => import("./FileViewer"), { ssr: false });
+
+interface ViewerState {
+  isOpen: boolean;
+  url: string;
+  fileType: string;
+  title: string;
+}
 
 interface ResearchResultsProps {
   result: {
@@ -28,12 +38,6 @@ interface ResearchResultsProps {
     task_id: string;
     output?: string;
     sources?: Array<{ title: string; url: string }>;
-    usage?: {
-      search_units: number;
-      ai_units: number;
-      compute_units: number;
-      total_cost: number;
-    };
     pdf_url?: string;
     deliverables?: Array<{ type: string; title: string; url: string }>;
     progress?: { current_step: number; total_steps: number };
@@ -42,13 +46,6 @@ interface ResearchResultsProps {
   } | null;
   onCancel: () => void;
   onReset: () => void;
-}
-
-interface ViewerState {
-  isOpen: boolean;
-  url: string;
-  fileType: string;
-  title: string;
 }
 
 function getFileIcon(format: string) {
@@ -85,9 +82,9 @@ function getFileLabel(format: string) {
 }
 
 export default function ResearchResults({ result, onCancel, onReset }: ResearchResultsProps) {
-  const [showReport, setShowReport] = useState(false);
+  const [showReport, setShowReport] = useState(true);
+  const [showSources, setShowSources] = useState(false);
   const [isDownloading, setIsDownloading] = useState<string | null>(null);
-  const [isCancelling, setIsCancelling] = useState(false);
   const [viewer, setViewer] = useState<ViewerState>({
     isOpen: false,
     url: "",
@@ -95,11 +92,11 @@ export default function ResearchResults({ result, onCancel, onReset }: ResearchR
     title: "",
   });
 
-  // Parse markdown to HTML string once with marked (fast, no React element tree)
+  // Only compute HTML when report is expanded - avoids work on initial render
   const reportHtml = useMemo(() => {
-    if (!result?.output) return "";
+    if (!showReport || !result?.output) return "";
     return marked(result.output, { gfm: true, breaks: true }) as string;
-  }, [result?.output]);
+  }, [showReport, result?.output]);
 
   if (!result) return null;
 
@@ -141,14 +138,8 @@ export default function ResearchResults({ result, onCancel, onReset }: ResearchR
     setViewer({ isOpen: false, url: "", fileType: "", title: "" });
   };
 
-  const handleCancel = async () => {
-    setIsCancelling(true);
-    await onCancel();
-    setIsCancelling(false);
-  };
-
   return (
-    <div className="space-y-4 sm:space-y-6 min-w-0">
+    <div className="space-y-4 min-w-0">
       {/* File Viewer Modal */}
       <FileViewer
         url={viewer.url}
@@ -182,7 +173,7 @@ export default function ResearchResults({ result, onCancel, onReset }: ResearchR
             </div>
             <span className="text-xs text-text-muted">{progressPercent}%</span>
           </div>
-          <div className="w-full h-2 bg-surface rounded-full overflow-hidden border border-border/40">
+          <div className="w-full h-1.5 bg-surface rounded-full overflow-hidden border border-border/40">
             <div
               className={`h-full rounded-full transition-all duration-700 ease-out ${
                 isComplete ? "bg-green-500" : "bg-primary"
@@ -204,82 +195,52 @@ export default function ResearchResults({ result, onCancel, onReset }: ResearchR
       {/* Cancel button during running */}
       {isInProgress && (
         <button
-          onClick={handleCancel}
-          disabled={isCancelling}
-          className="btn-secondary flex items-center gap-2 min-h-[44px]"
+          onClick={onCancel}
+          className="px-4 py-2 text-sm border border-border rounded-lg hover:bg-surface-hover transition-colors text-text-muted"
         >
-          {isCancelling ? (
-            <>
-              <Loader2 className="w-4 h-4 animate-spin" />
-              Cancelling...
-            </>
-          ) : (
-            <>
-              <XCircle className="w-4 h-4" />
-              Cancel Research
-            </>
-          )}
+          Cancel Research
         </button>
       )}
 
       {/* Completed results */}
       {isComplete && (
-        <>
-          {/* Success header */}
-          <div className="card bg-success/5 border-success/30">
-            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-              <div className="flex items-start gap-3">
-                <CheckCircle className="w-6 h-6 sm:w-8 sm:h-8 text-success flex-shrink-0" />
-                <div>
-                  <h2 className="text-base sm:text-lg font-semibold">Research Complete</h2>
-                  <p className="text-xs sm:text-sm text-text-muted">
-                    Your deliverables are ready to view and download
-                  </p>
-                </div>
-              </div>
-              <button onClick={onReset} className="btn-secondary flex items-center gap-2 w-full sm:w-auto min-h-[44px]">
-                <RefreshCw className="w-4 h-4" />
-                <span>New Research</span>
-              </button>
-            </div>
-          </div>
-
+        <div className="space-y-4">
           {/* Deliverables with View/Download */}
           {(result.deliverables?.length || result.pdf_url) && (
-            <div className="card">
-              <h3 className="font-semibold text-base sm:text-lg mb-3 sm:mb-4 flex items-center gap-2">
-                <Download className="w-4 h-4 sm:w-5 sm:h-5" />
+            <div className="space-y-3">
+              <h3 className="text-sm font-semibold text-foreground flex items-center gap-2">
+                <Download className="w-4 h-4" />
                 Deliverables
               </h3>
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
                 {result.pdf_url && (
                   <div className="p-3 sm:p-4 bg-surface rounded-lg border border-border">
                     <div className="flex items-center gap-3 mb-3">
                       {getFileIcon("pdf")}
                       <div className="flex-1 min-w-0">
-                        <div className="font-medium text-sm sm:text-base">Research Report</div>
+                        <div className="font-medium text-sm">Research Report</div>
                         <div className="text-xs text-text-muted">PDF Document</div>
                       </div>
                     </div>
-                    <div className="flex flex-col sm:flex-row gap-2">
+                    <div className="flex gap-2">
                       <button
                         onClick={() => handleView(result.pdf_url!, "pdf", "Research Report")}
-                        className="flex-1 flex items-center justify-center gap-2 px-3 py-2.5 bg-primary/10 hover:bg-primary/20 text-primary rounded-lg transition-all active:scale-95 text-sm font-medium min-h-[44px]"
+                        className="flex-1 flex items-center justify-center gap-2 px-3 py-2.5 bg-primary/10 hover:bg-primary/20 text-primary rounded-lg transition-all text-sm font-medium min-h-[44px]"
                       >
                         <Eye className="w-4 h-4" />
-                        <span>View</span>
+                        View
                       </button>
                       <button
                         onClick={() => handleDownload(result.pdf_url!, "research-report.pdf")}
                         disabled={isDownloading === "research-report.pdf"}
-                        className="flex-1 flex items-center justify-center gap-2 px-3 py-2.5 bg-surface-hover hover:bg-border rounded-lg transition-all active:scale-95 text-sm font-medium min-h-[44px]"
+                        className="flex-1 flex items-center justify-center gap-2 px-3 py-2.5 bg-surface-hover hover:bg-border rounded-lg transition-all text-sm font-medium min-h-[44px]"
                       >
                         {isDownloading === "research-report.pdf" ? (
                           <Loader2 className="w-4 h-4 animate-spin" />
                         ) : (
                           <Download className="w-4 h-4" />
                         )}
-                        <span>Download</span>
+                        Download
                       </button>
                     </div>
                   </div>
@@ -289,33 +250,31 @@ export default function ResearchResults({ result, onCancel, onReset }: ResearchR
                     <div className="flex items-center gap-3 mb-3">
                       {getFileIcon(deliverable.type)}
                       <div className="flex-1 min-w-0">
-                        <div className="font-medium text-sm sm:text-base truncate">{getFileLabel(deliverable.type)}</div>
+                        <div className="font-medium text-sm">{getFileLabel(deliverable.type)}</div>
                         <div className="text-xs text-text-muted">
                           {deliverable.type.toUpperCase()} File
                         </div>
                       </div>
                     </div>
-                    <div className="flex flex-col sm:flex-row gap-2">
+                    <div className="flex gap-2">
                       <button
                         onClick={() => handleView(deliverable.url, deliverable.type, getFileLabel(deliverable.type))}
-                        className="flex-1 flex items-center justify-center gap-2 px-3 py-2.5 bg-primary/10 hover:bg-primary/20 text-primary rounded-lg transition-all active:scale-95 text-sm font-medium min-h-[44px]"
+                        className="flex-1 flex items-center justify-center gap-2 px-3 py-2.5 bg-primary/10 hover:bg-primary/20 text-primary rounded-lg transition-all text-sm font-medium min-h-[44px]"
                       >
                         <Eye className="w-4 h-4" />
-                        <span>View</span>
+                        View
                       </button>
                       <button
-                        onClick={() =>
-                          handleDownload(deliverable.url, `${deliverable.title}.${deliverable.type}`)
-                        }
+                        onClick={() => handleDownload(deliverable.url, `${deliverable.title}.${deliverable.type}`)}
                         disabled={isDownloading === `${deliverable.title}.${deliverable.type}`}
-                        className="flex-1 flex items-center justify-center gap-2 px-3 py-2.5 bg-surface-hover hover:bg-border rounded-lg transition-all active:scale-95 text-sm font-medium min-h-[44px]"
+                        className="flex-1 flex items-center justify-center gap-2 px-3 py-2.5 bg-surface-hover hover:bg-border rounded-lg transition-all text-sm font-medium min-h-[44px]"
                       >
                         {isDownloading === `${deliverable.title}.${deliverable.type}` ? (
                           <Loader2 className="w-4 h-4 animate-spin" />
                         ) : (
                           <Download className="w-4 h-4" />
                         )}
-                        <span>Download</span>
+                        Download
                       </button>
                     </div>
                   </div>
@@ -324,130 +283,117 @@ export default function ResearchResults({ result, onCancel, onReset }: ResearchR
             </div>
           )}
 
-          {/* Sources */}
-          {result.sources && result.sources.length > 0 && (
-            <div className="card">
-              <h3 className="font-semibold text-base sm:text-lg mb-3 sm:mb-4">
-                Sources ({result.sources.length})
-              </h3>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 sm:gap-3">
-                {result.sources.map((source, index) => {
-                  let domain = "";
-                  try {
-                    domain = new URL(source.url).hostname.replace("www.", "");
-                  } catch {
-                    domain = source.url;
-                  }
-                  return (
-                    <a
-                      key={index}
-                      href={source.url}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="flex items-center gap-3 p-3 bg-surface hover:bg-surface-hover rounded-lg border border-border transition-colors"
-                    >
-                      {/* eslint-disable-next-line @next/next/no-img-element */}
-                      <img
-                        src={`https://www.google.com/s2/favicons?domain=${domain}&sz=32`}
-                        alt=""
-                        className="w-5 h-5 rounded"
-                        onError={(e) => {
-                          (e.target as HTMLImageElement).style.display = "none";
-                        }}
-                      />
-                      <div className="flex-1 min-w-0">
-                        <div className="font-medium text-sm truncate">
-                          {source.title || domain}
-                        </div>
-                        <div className="text-xs text-text-muted truncate">
-                          {domain}
-                        </div>
-                      </div>
-                      <ExternalLink className="w-4 h-4 text-text-muted flex-shrink-0" />
-                    </a>
-                  );
-                })}
-              </div>
-            </div>
-          )}
-
-          {/* Research Output - uses marked for fast HTML rendering (not ReactMarkdown) */}
+          {/* Full Report (collapsible, with CSS containment + scroll constraint) */}
           {result.output && (
-            <div className="card">
+            <div>
               <button
                 onClick={() => setShowReport(!showReport)}
-                className="w-full flex items-center justify-between"
+                className="flex items-center gap-2 text-sm font-medium text-foreground hover:text-primary transition-colors"
               >
-                <h3 className="font-semibold text-base sm:text-lg flex items-center gap-2">
-                  <BookOpen className="w-4 h-4 sm:w-5 sm:h-5" />
-                  Research Findings
-                </h3>
+                <BookOpen className="w-4 h-4" />
+                <span>Full Report</span>
                 {showReport ? (
-                  <ChevronUp className="w-5 h-5 text-text-muted" />
+                  <ChevronUp className="w-4 h-4" />
                 ) : (
-                  <ChevronDown className="w-5 h-5 text-text-muted" />
+                  <ChevronDown className="w-4 h-4" />
                 )}
               </button>
               {showReport && (
                 <div
-                  className="mt-4 prose prose-sm sm:prose-base max-w-none dark:prose-invert prose-headings:text-foreground prose-p:text-text-muted prose-a:text-primary prose-strong:text-foreground"
-                  dangerouslySetInnerHTML={{ __html: reportHtml }}
-                />
+                  className="mt-3 rounded-lg border border-border bg-surface max-h-[70vh] overflow-y-auto overflow-x-hidden"
+                  style={{ contain: "layout" }}
+                >
+                  <div
+                    className="p-4 sm:p-6 prose prose-sm max-w-none dark:prose-invert break-words"
+                    style={{ overflowWrap: "anywhere" }}
+                    dangerouslySetInnerHTML={{ __html: reportHtml }}
+                  />
+                </div>
               )}
             </div>
           )}
 
-          {/* Usage stats */}
-          {result.usage && (
-            <div className="card">
-              <h3 className="font-semibold text-base sm:text-lg mb-3 sm:mb-4">Research Metrics</h3>
-              <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4">
-                <div className="text-center p-3 bg-surface rounded-lg">
-                  <div className="text-xl sm:text-2xl font-bold text-primary">
-                    {result.usage.search_units}
-                  </div>
-                  <div className="text-[10px] sm:text-xs text-text-muted">Search Units</div>
+          {/* Sources (collapsible) */}
+          {result.sources && result.sources.length > 0 && (
+            <div>
+              <button
+                onClick={() => setShowSources(!showSources)}
+                className="flex items-center gap-2 text-sm font-medium text-foreground hover:text-primary transition-colors"
+              >
+                <Globe className="w-4 h-4" />
+                <span>{result.sources.length} Sources</span>
+                {showSources ? (
+                  <ChevronUp className="w-4 h-4" />
+                ) : (
+                  <ChevronDown className="w-4 h-4" />
+                )}
+              </button>
+              {showSources && (
+                <div className="mt-2 space-y-1.5">
+                  {result.sources.map((source, i) => {
+                    let domain = "";
+                    try {
+                      domain = new URL(source.url).hostname.replace("www.", "");
+                    } catch {
+                      domain = source.url;
+                    }
+                    return (
+                      <a
+                        key={i}
+                        href={source.url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="flex items-center gap-2.5 px-3 py-2 rounded-md bg-surface hover:bg-surface-hover border border-border/60 hover:border-primary/40 group transition-all"
+                      >
+                        {/* eslint-disable-next-line @next/next/no-img-element */}
+                        <img
+                          src={`https://www.google.com/s2/favicons?domain=${domain}&sz=16`}
+                          alt=""
+                          className="w-4 h-4 rounded-sm flex-shrink-0"
+                          onError={(e) => {
+                            (e.target as HTMLImageElement).style.display = "none";
+                          }}
+                        />
+                        <span className="text-sm text-text-muted group-hover:text-primary transition-colors truncate flex-1">
+                          {source.title || domain}
+                        </span>
+                        <ExternalLink className="w-3.5 h-3.5 opacity-0 group-hover:opacity-100 transition-opacity flex-shrink-0 text-primary" />
+                      </a>
+                    );
+                  })}
                 </div>
-                <div className="text-center p-3 bg-surface rounded-lg">
-                  <div className="text-xl sm:text-2xl font-bold text-primary">
-                    {result.usage.ai_units}
-                  </div>
-                  <div className="text-[10px] sm:text-xs text-text-muted">AI Units</div>
-                </div>
-                <div className="text-center p-3 bg-surface rounded-lg">
-                  <div className="text-xl sm:text-2xl font-bold text-primary">
-                    {result.usage.compute_units}
-                  </div>
-                  <div className="text-[10px] sm:text-xs text-text-muted">Compute Units</div>
-                </div>
-                <div className="text-center p-3 bg-surface rounded-lg">
-                  <div className="text-xl sm:text-2xl font-bold text-accent">
-                    ${result.usage.total_cost.toFixed(2)}
-                  </div>
-                  <div className="text-[10px] sm:text-xs text-text-muted">Total Cost</div>
-                </div>
-              </div>
+              )}
             </div>
           )}
-        </>
+
+          {/* Actions */}
+          <div className="flex gap-3 pt-2">
+            <button
+              onClick={onReset}
+              className="flex items-center gap-2 px-4 py-2 text-sm bg-primary text-white rounded-lg hover:bg-primary/90 transition-colors"
+            >
+              <RefreshCw className="w-4 h-4" />
+              New Research
+            </button>
+          </div>
+        </div>
       )}
 
       {/* Failed state */}
       {isFailed && (
-        <div className="card bg-error/5 border-error/30">
-          <div className="flex flex-col items-center text-center py-6 sm:py-8 px-4">
-            <XCircle className="w-12 h-12 sm:w-16 sm:h-16 text-error mb-4" />
-            <h2 className="text-lg sm:text-xl font-semibold mb-2">
-              {result.status === "cancelled" ? "Research Cancelled" : "Research Failed"}
-            </h2>
-            <p className="text-sm sm:text-base text-text-muted mb-6 max-w-md">
-              {result.error || "An unexpected error occurred during research."}
-            </p>
-            <button onClick={onReset} className="btn-primary flex items-center gap-2 min-h-[44px]">
-              <RefreshCw className="w-4 h-4" />
-              <span>Try Again</span>
-            </button>
+        <div className="rounded-lg border border-red-500/20 bg-red-500/5 p-4 space-y-3">
+          <div className="flex items-center gap-2">
+            <XCircle className="w-5 h-5 text-red-500" />
+            <h3 className="text-sm font-medium text-red-500">Research Failed</h3>
           </div>
+          <p className="text-sm text-text-muted">{result.error || "An unknown error occurred"}</p>
+          <button
+            onClick={onReset}
+            className="flex items-center gap-2 px-4 py-2 text-sm bg-primary text-white rounded-lg hover:bg-primary/90 transition-colors"
+          >
+            <RefreshCw className="w-4 h-4" />
+            Try Again
+          </button>
         </div>
       )}
     </div>
