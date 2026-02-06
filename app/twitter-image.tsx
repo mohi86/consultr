@@ -2,7 +2,7 @@ import { ImageResponse } from "next/og";
 
 export const runtime = "edge";
 
-export const alt = "Consulting Research Intelligence - AI-Powered Deep Research";
+export const alt = "ConsultRalph - AI-Powered Deep Research";
 export const size = {
   width: 1200,
   height: 630,

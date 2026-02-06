@@ -32,9 +32,9 @@ export const metadata: Metadata = {
     "EY",
     ""
   ],
-  authors: [{ name: "Consulting Research Intelligence" }],
-  creator: "Consulting Research Intelligence",
-  publisher: "Consulting Research Intelligence",
+  authors: [{ name: "ConsultRalph Intelligence" }],
+  creator: "ConsultRalph Intelligence",
+  publisher: "ConsultRalph Intelligence",
   icons: {
     icon: [
       { url: "/favicon-16x16.png", sizes: "16x16", type: "image/png" },

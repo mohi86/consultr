@@ -601,7 +601,7 @@ export default function Home() {
                   </div>
                   <div>
                     <h1 className="text-lg sm:text-xl font-bold">
-                      <span className="gradient-text">Consulting Research</span>
+                      <span className="gradient-text">ConsultRalph</span>
                     </h1>
                     {currentResearchTitle && (
                       <p className="text-xs sm:text-sm text-text-muted">
