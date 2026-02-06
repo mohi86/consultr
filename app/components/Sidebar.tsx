@@ -114,7 +114,7 @@ export default function Sidebar({
           ? `/api/consulting-research/list?accessToken=${encodeURIComponent(accessToken)}`
           : `/api/consulting-research/list`;
         const response = await fetch(url);
-        if (!response.ok) throw new Error("API returned " + response.status);
+        if (!response.ok) throw new Error("List API " + response.status);
         const data = await response.json();
         if (data.tasks && data.tasks.length > 0) {
           const mapped: ResearchHistoryItem[] = data.tasks.map(
@@ -129,8 +129,8 @@ export default function Sidebar({
           setHistory(mapped);
           return;
         }
-      } catch (error) {
-        console.error("Failed to fetch research history from API:", error);
+      } catch {
+        // API unavailable - fall through to localStorage
       }
       // Fall back to localStorage if API fails or returns empty
       const localHistory = getResearchHistory();

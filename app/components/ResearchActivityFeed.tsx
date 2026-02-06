@@ -77,9 +77,14 @@ function getMessageSignature(messages: Message[] | undefined): string {
 
 function extractSources(output: unknown): Array<{ title: string; url: string }> {
   if (!output || typeof output !== "object") return [];
-  const obj = output as Record<string, unknown>;
+  let obj = output as Record<string, unknown>;
 
-  // Check for sources array directly
+  // Unwrap nested { type: "json", value: { sources: [...] } } format from Valyu API
+  if (obj.type === "json" && obj.value && typeof obj.value === "object") {
+    obj = obj.value as Record<string, unknown>;
+  }
+
+  // Check for sources array
   if (Array.isArray(obj.sources)) {
     return obj.sources
       .filter((s: unknown) => s && typeof s === "object" && (s as Record<string, unknown>).url)
@@ -124,12 +129,12 @@ function getToolQuery(input: Record<string, unknown>): string | null {
 const ReasoningItem = React.memo(
   function ReasoningItem({ text }: { text: string }) {
     return (
-      <div className="activity-item-enter rounded-lg border border-blue-500/20 bg-blue-500/5 p-3">
+      <div className="activity-item-enter rounded-lg border border-blue-500/20 bg-blue-500/5 p-3 min-w-0 overflow-hidden">
         <div className="flex items-center gap-2 mb-2">
           <Brain className="w-3.5 h-3.5 text-blue-400" />
           <span className="text-xs font-medium text-blue-400">Reasoning</span>
         </div>
-        <div className="prose prose-sm max-w-none prose-invert text-sm text-text-muted leading-relaxed">
+        <div className="prose prose-sm max-w-none prose-invert text-sm text-text-muted leading-relaxed overflow-hidden break-words">
           <ReactMarkdown remarkPlugins={[remarkGfm]}>{text}</ReactMarkdown>
         </div>
       </div>
@@ -146,7 +151,7 @@ const UserMessageItem = React.memo(
       .trim();
 
     return (
-      <div className="activity-item-enter rounded-lg border border-neutral-500/20 bg-neutral-500/5 p-3">
+      <div className="activity-item-enter rounded-lg border border-neutral-500/20 bg-neutral-500/5 p-3 min-w-0 overflow-hidden">
         <div className="flex items-center gap-2 mb-2">
           <User className="w-3.5 h-3.5 text-neutral-400" />
           <span className="text-xs font-medium text-neutral-400">
@@ -169,89 +174,79 @@ const ToolCallItem = React.memo(
     call: ToolCall;
     result?: ToolResult;
   }) {
-    const [isExpanded, setIsExpanded] = useState(false);
     const hasResult = !!result;
     const sources = hasResult ? extractSources(result.output) : [];
     const query = getToolQuery(call.input);
 
     return (
       <div
-        className={`activity-item-enter rounded-lg border p-3 ${
+        className={`activity-item-enter rounded-lg border p-3 min-w-0 overflow-hidden ${
           hasResult
             ? "border-green-500/20 bg-green-500/5"
             : "border-yellow-500/20 bg-yellow-500/5"
         }`}
       >
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <Wrench className={`w-3.5 h-3.5 ${hasResult ? "text-green-400" : "text-yellow-400 animate-pulse"}`} />
-            <span className={`text-xs font-medium ${hasResult ? "text-green-400" : "text-yellow-400"}`}>
-              {formatToolName(call.toolName)}
-            </span>
-            {!hasResult && (
-              <span className="text-xs text-yellow-400/60">Running...</span>
-            )}
-          </div>
-          {(sources.length > 0 || query) && (
-            <button
-              onClick={() => setIsExpanded(!isExpanded)}
-              className="text-text-muted hover:text-foreground transition-colors p-1"
-            >
-              {isExpanded ? (
-                <ChevronUp className="w-3.5 h-3.5" />
-              ) : (
-                <ChevronDown className="w-3.5 h-3.5" />
-              )}
-            </button>
+        {/* Tool header */}
+        <div className="flex items-center gap-2 min-w-0">
+          <Wrench className={`w-3.5 h-3.5 flex-shrink-0 ${hasResult ? "text-green-400" : "text-yellow-400 animate-pulse"}`} />
+          <span className={`text-xs font-medium ${hasResult ? "text-green-400" : "text-yellow-400"}`}>
+            {formatToolName(call.toolName)}
+          </span>
+          {!hasResult && (
+            <span className="text-xs text-yellow-400/60">Running...</span>
           )}
         </div>
 
+        {/* Query */}
         {query && (
-          <p className="text-xs text-text-muted mt-1.5 truncate">
+          <p className="text-xs text-text-muted mt-1.5 truncate min-w-0">
             &quot;{query}&quot;
           </p>
         )}
 
+        {/* Sources inline (like platform) */}
         {hasResult && sources.length > 0 && (
-          <div className="flex items-center gap-1.5 mt-2">
-            <CornerDownRight className="w-3 h-3 text-text-muted" />
-            <span className="text-xs text-text-muted">
-              {sources.length} source{sources.length !== 1 ? "s" : ""} found
-            </span>
-          </div>
-        )}
-
-        {isExpanded && sources.length > 0 && (
-          <div className="mt-3 space-y-1.5 pl-4 border-l-2 border-border">
-            {sources.map((source, i) => {
-              let domain = "";
-              try {
-                domain = new URL(source.url).hostname.replace("www.", "");
-              } catch {
-                domain = source.url;
-              }
-              return (
-                <a
-                  key={i}
-                  href={source.url}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="flex items-center gap-2 text-xs text-text-muted hover:text-foreground transition-colors py-0.5"
-                >
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img
-                    src={`https://www.google.com/s2/favicons?domain=${domain}&sz=16`}
-                    alt=""
-                    className="w-3.5 h-3.5 rounded-sm"
-                    onError={(e) => {
-                      (e.target as HTMLImageElement).style.display = "none";
-                    }}
-                  />
-                  <span className="truncate flex-1">{source.title || domain}</span>
-                  <ExternalLink className="w-3 h-3 flex-shrink-0" />
-                </a>
-              );
-            })}
+          <div className="flex gap-2.5 pl-1 mt-2 min-w-0">
+            <div className="flex items-start">
+              <CornerDownRight className="h-4 w-4 text-green-400/40 flex-shrink-0" />
+            </div>
+            <div className="flex-1 space-y-1.5 min-w-0">
+              <div className="text-[10px] font-medium text-green-400 uppercase tracking-wide">
+                {sources.length} {sources.length === 1 ? "Source" : "Sources"} Found
+              </div>
+              {sources.map((source, i) => {
+                let domain = "";
+                try {
+                  domain = new URL(source.url).hostname.replace("www.", "");
+                } catch {
+                  domain = source.url;
+                }
+                return (
+                  <a
+                    key={i}
+                    href={source.url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex items-center gap-2.5 px-3 py-2 rounded-md bg-surface hover:bg-surface-hover border border-border/60 hover:border-primary/40 group transition-all min-w-0"
+                    onClick={(e) => e.stopPropagation()}
+                  >
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img
+                      src={`https://www.google.com/s2/favicons?domain=${domain}&sz=16`}
+                      alt=""
+                      className="w-4 h-4 rounded-sm flex-shrink-0"
+                      onError={(e) => {
+                        (e.target as HTMLImageElement).style.display = "none";
+                      }}
+                    />
+                    <span className="text-xs text-text-muted flex-1 group-hover:text-primary transition-colors truncate min-w-0">
+                      {source.title || domain}
+                    </span>
+                    <ExternalLink className="w-3.5 h-3.5 opacity-0 group-hover:opacity-100 transition-opacity flex-shrink-0 text-primary" />
+                  </a>
+                );
+              })}
+            </div>
           </div>
         )}
       </div>
@@ -295,8 +290,8 @@ export default function ResearchActivityFeed({
         hasSeenAssistantMessage = true;
         if (Array.isArray(message.content)) {
           for (const item of message.content as MessageContent[]) {
-            if (item.type === "text") {
-              textBlocks.push({ text: item.text, index: messageIndex++ });
+            if (item.type === "text" || item.type === "reasoning" as string) {
+              textBlocks.push({ text: (item as TextContent).text, index: messageIndex++ });
             } else if (item.type === "tool-call") {
               toolCallMap.set(item.toolCallId, {
                 call: item as ToolCall,
@@ -394,7 +389,7 @@ export default function ResearchActivityFeed({
   }
 
   return (
-    <div className="w-full mt-4">
+    <div className="w-full mt-4 min-w-0 overflow-hidden">
       {/* Collapsed header / toggle */}
       <button
         onClick={() => setIsExpanded(!isExpanded)}
@@ -427,7 +422,7 @@ export default function ResearchActivityFeed({
           <div
             ref={feedRef}
             onScroll={handleScroll}
-            className="max-h-[400px] overflow-y-auto space-y-3 pr-1 activity-feed-scroll"
+            className="max-h-[400px] overflow-y-auto overflow-x-hidden space-y-3 pr-1 activity-feed-scroll"
           >
             {timeline.map((item) => {
               if (item.type === "user") {

@@ -84,6 +84,7 @@ export default function Home() {
         const statusUrl = accessToken
           ? `/api/consulting-research/status?taskId=${taskId}&accessToken=${encodeURIComponent(accessToken)}`
           : `/api/consulting-research/status?taskId=${taskId}`;
+
         const response = await fetch(statusUrl);
 
         if (!response.ok) {
@@ -92,13 +93,6 @@ export default function Home() {
         }
 
         const data = await response.json();
-        console.log('[DEBUG] Status API response:', {
-          status: data.status,
-          hasDeliverables: !!data.deliverables,
-          hasOutput: !!data.output,
-          hasPdfUrl: !!data.pdf_url,
-          deliverableCount: data.deliverables?.length,
-        });
         setResearchResult(data);
 
         if (
@@ -111,7 +105,7 @@ export default function Home() {
           updateHistoryStatus(taskId, data.status);
         }
       } catch (error) {
-        console.error("Error polling status:", error);
+        console.error("Error polling research status:", error);
       }
     },
     [clearPolling, getAccessToken]
