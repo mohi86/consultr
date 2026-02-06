@@ -16,25 +16,6 @@ interface SignInModalProps {
   onOpenChange: (open: boolean) => void;
 }
 
-function ValyuLogoWithText() {
-  return (
-    <div className="flex items-center gap-2">
-      <svg
-        viewBox="0 0 24 24"
-        fill="none"
-        className="h-5 w-5"
-        stroke="currentColor"
-        strokeWidth="2.5"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      >
-        <path d="M12 20L4 4h16L12 20z" />
-      </svg>
-      <span className="font-semibold tracking-wide">VALYU</span>
-    </div>
-  );
-}
-
 export function SignInModal({ open, onOpenChange }: SignInModalProps) {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);

@@ -10,7 +10,6 @@ import {
   Search,
   ChevronLeft,
   ChevronRight,
-  Briefcase,
   HelpCircle,
   Sun,
   Moon,
@@ -24,7 +23,6 @@ import {
   Plus,
   Lock,
   X,
-  Menu,
 } from "lucide-react";
 import {
   getResearchHistory,

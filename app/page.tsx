@@ -7,7 +7,7 @@ import ResearchResults from "./components/ResearchResults";
 import Sidebar from "./components/Sidebar";
 import GitHubCorner from "./components/GitHubCorner";
 import { SignInModal } from "./components/auth";
-import { X, Menu } from "lucide-react";
+import { X } from "lucide-react";
 import { DottedGlowBackground } from "@/components/ui/dotted-glow-background";
 import {
   saveToHistory,
@@ -286,7 +286,7 @@ export default function Home() {
             video.muted = false;
             setIntroStarted(true);
           }, 100);
-        } catch (error) {
+        } catch {
           console.log('Autoplay with sound blocked, showing play button');
         }
       };
