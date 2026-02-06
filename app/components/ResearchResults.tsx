@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import React, { useState, useMemo } from "react";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import {
@@ -76,6 +76,22 @@ export default function ResearchResults({
     fileType: "",
     title: "",
   });
+
+  const markdownComponents = useMemo(() => ({
+    a: ({ href, children }: { href?: string; children?: React.ReactNode }) => (
+      <a
+        href={href}
+        target="_blank"
+        rel="noopener noreferrer"
+        className="text-primary hover:underline inline-flex items-center gap-1"
+      >
+        {children}
+        <ExternalLink className="w-3 h-3" />
+      </a>
+    ),
+  }), []);
+
+  const remarkPlugins = useMemo(() => [remarkGfm], []);
 
   const getStatusMessage = (status: string) => {
     switch (status) {
@@ -195,7 +211,7 @@ export default function ResearchResults({
       />
 
       {/* Status Header */}
-      {(isInProgress || isLoadingData) && (
+      {isInProgress && (
         <div className="card">
           <div className="flex flex-col items-center text-center">
             {/* Status + Progress Bar */}
@@ -247,6 +263,16 @@ export default function ResearchResults({
                 </>
               )}
             </button>
+          </div>
+        </div>
+      )}
+
+      {/* Loading data spinner */}
+      {isLoadingData && (
+        <div className="card">
+          <div className="flex flex-col items-center text-center py-8">
+            <Loader2 className="w-8 h-8 text-primary animate-spin mb-3" />
+            <p className="text-sm text-text-muted">Loading research results...</p>
           </div>
         </div>
       )}
@@ -362,20 +388,8 @@ export default function ResearchResults({
               <h3 className="font-semibold text-base sm:text-lg mb-3 sm:mb-4">Research Findings</h3>
               <div className="prose prose-sm sm:prose-base max-w-none">
                 <ReactMarkdown
-                  remarkPlugins={[remarkGfm]}
-                  components={{
-                    a: ({ href, children }) => (
-                      <a
-                        href={href}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="text-primary hover:underline inline-flex items-center gap-1"
-                      >
-                        {children}
-                        <ExternalLink className="w-3 h-3" />
-                      </a>
-                    ),
-                  }}
+                  remarkPlugins={remarkPlugins}
+                  components={markdownComponents}
                 >
                   {result.output}
                 </ReactMarkdown>

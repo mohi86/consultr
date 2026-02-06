@@ -9,11 +9,7 @@ import GitHubCorner from "./components/GitHubCorner";
 import { SignInModal } from "./components/auth";
 import { X } from "lucide-react";
 import { DottedGlowBackground } from "@/components/ui/dotted-glow-background";
-import {
-  saveToHistory,
-  updateHistoryStatus,
-  ResearchHistoryItem,
-} from "./lib/researchHistory";
+import { ResearchHistoryItem } from "./lib/researchHistory";
 import { useAuthStore } from "./stores/auth-store";
 
 interface ResearchResult {
@@ -105,20 +101,13 @@ export default function Home() {
         });
         setResearchResult(data);
 
-        // Update history status
-        if (data.status) {
-          updateHistoryStatus(taskId, data.status);
-        }
-
         if (
           data.status === "completed" ||
           data.status === "failed" ||
           data.status === "cancelled"
         ) {
           clearPolling();
-          if (data.status !== "completed") {
-            setIsResearching(false);
-          }
+          setIsResearching(false);
         }
       } catch (error) {
         console.error("Error polling status:", error);
@@ -136,14 +125,6 @@ export default function Home() {
       setResearchResult({
         status: "queued",
         task_id: taskId,
-      });
-
-      // Save to history
-      saveToHistory({
-        id: taskId,
-        title: title,
-        researchType: researchType,
-        status: "queued",
       });
 
       // Start polling immediately
@@ -220,9 +201,6 @@ export default function Home() {
         headers,
         body: JSON.stringify({ taskId: currentTaskId }),
       });
-
-      // Update history status
-      updateHistoryStatus(currentTaskId, "cancelled");
     } catch (error) {
       console.error("Error cancelling research:", error);
     }
