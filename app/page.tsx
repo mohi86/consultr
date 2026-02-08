@@ -523,9 +523,6 @@ function HomeContent() {
                   <br className="hidden sm:block" />
                   Generate comprehensive reports in 5-10 minutes with PowerPoint decks, Excel spreadsheets, and Word documents.
                   <br className="hidden sm:block" />
-                  <span className="block mt-2">
-                    Powered by Valyu, the Search API for AI knowledge work.
-                  </span>
                 </p>
               </div>
 
