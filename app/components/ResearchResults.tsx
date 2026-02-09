@@ -5,9 +5,6 @@ import dynamic from "next/dynamic";
 import {
   CheckCircle,
   XCircle,
-  FileText,
-  FileSpreadsheet,
-  File,
   Download,
   ChevronDown,
   ChevronUp,
@@ -15,10 +12,10 @@ import {
   RefreshCw,
   BookOpen,
   Eye,
-  Presentation,
   Maximize2,
   X,
 } from "lucide-react";
+import { FileIcon, defaultStyles } from "react-file-icon";
 import ResearchActivityFeed from "./ResearchActivityFeed";
 import MarkdownRenderer from "./MarkdownRenderer";
 
@@ -48,20 +45,22 @@ interface ResearchResultsProps {
   onReset: () => void;
 }
 
+const FILE_ICON_STYLES: Record<string, Record<string, unknown>> = {
+  pdf: defaultStyles.pdf,
+  pptx: defaultStyles.pptx,
+  csv: { ...defaultStyles.csv, color: "#1A754C", foldColor: "#16613F", glyphColor: "rgba(255,255,255,0.4)", labelColor: "#1A754C", labelUppercase: true },
+  xlsx: defaultStyles.xlsx,
+  docx: defaultStyles.docx,
+};
+
 function getFileIcon(format: string) {
-  switch (format.toLowerCase()) {
-    case "pdf":
-      return <FileText className="w-5 h-5 text-red-500" />;
-    case "csv":
-    case "xlsx":
-      return <FileSpreadsheet className="w-5 h-5 text-green-500" />;
-    case "docx":
-      return <File className="w-5 h-5 text-blue-500" />;
-    case "pptx":
-      return <Presentation className="w-5 h-5 text-orange-500" />;
-    default:
-      return <File className="w-5 h-5 text-gray-500" />;
-  }
+  const ext = format.toLowerCase();
+  const styles = FILE_ICON_STYLES[ext] || {};
+  return (
+    <div className="w-5">
+      <FileIcon extension={ext} {...styles} />
+    </div>
+  );
 }
 
 function getFileLabel(format: string) {
@@ -151,7 +150,7 @@ export default function ResearchResults({ result, onCancel, onReset }: ResearchR
         <div className="rounded-lg border border-primary/20 bg-primary/5 p-4 space-y-2">
           <span className="text-sm font-medium text-foreground">Agent researching your topic</span>
           <p className="text-sm text-text-muted">
-            Generating report and deliverables (PowerPoint, Excel, Word). Expected around 5-10 minutes.
+            Generating report and deliverables (PowerPoint, Excel, Word). Expected around 5-10 minutes. Run multiple research in parallel or go make a cup of coffee.
           </p>
         </div>
       )}
@@ -199,14 +198,23 @@ export default function ResearchResults({ result, onCancel, onReset }: ResearchR
         />
       )}
 
-      {/* Cancel button during running */}
+      {/* Action buttons during running */}
       {isInProgress && (
-        <button
-          onClick={onCancel}
-          className="px-4 py-2 text-sm border border-border rounded-lg hover:bg-surface-hover transition-colors text-text-muted"
-        >
-          Cancel Research
-        </button>
+        <div className="flex gap-3">
+          <button
+            onClick={onReset}
+            className="flex items-center gap-2 px-4 py-2 text-sm bg-primary text-white rounded-lg hover:bg-primary/90 transition-colors"
+          >
+            <RefreshCw className="w-4 h-4" />
+            Start Another Research
+          </button>
+          <button
+            onClick={onCancel}
+            className="px-4 py-2 text-sm border border-border rounded-lg hover:bg-surface-hover transition-colors text-text-muted"
+          >
+            Cancel Research
+          </button>
+        </div>
       )}
 
       {/* Completed results */}
@@ -243,7 +251,7 @@ export default function ResearchResults({ result, onCancel, onReset }: ResearchR
                         <div className="flex gap-2">
                           <button
                             onClick={() => handleView(deliverable.url, deliverable.type, getFileLabel(deliverable.type))}
-                            className="flex-1 flex items-center justify-center gap-2 px-3 py-2.5 bg-primary/10 hover:bg-primary/20 text-primary rounded-lg transition-all text-sm font-medium min-h-[44px]"
+                            className="flex-1 flex items-center justify-center gap-2 px-3 py-2.5 bg-neutral-800 hover:bg-neutral-700 text-white dark:bg-white/10 dark:hover:bg-white/20 dark:text-white rounded-lg transition-all text-sm font-medium min-h-[44px]"
                           >
                             <Eye className="w-4 h-4" />
                             View

@@ -23,6 +23,8 @@ import {
   Plus,
   Lock,
   X,
+  LogOut,
+  User as UserIcon,
 } from "lucide-react";
 import { ResearchHistoryItem, getResearchHistory, removeFromHistory, clearHistory } from "@/app/lib/researchHistory";
 import { useAuthStore } from "@/app/stores/auth-store";
@@ -44,7 +46,7 @@ interface SidebarProps {
 
 const bottomItems = [
   { icon: BookOpen, label: "Documentation", href: "https://docs.valyu.ai/guides/deepresearch-quickstart" },
-  { icon: HelpCircle, label: "Help & Support", href: "https://discord.com/invite/BhUWrFbHRa" },
+  { icon: HelpCircle, label: "Join our Discord", href: "https://discord.com/invite/BhUWrFbHRa" },
 ];
 
 export default function Sidebar({
@@ -67,7 +69,7 @@ export default function Sidebar({
   const [history, setHistory] = useState<ResearchHistoryItem[]>([]);
   const [showEnterpriseModal, setShowEnterpriseModal] = useState(false);
 
-  const { isAuthenticated, openSignInModal } = useAuthStore();
+  const { isAuthenticated, openSignInModal, user, signOut } = useAuthStore();
   const { theme, toggleTheme } = useThemeStore();
 
   // In Valyu mode, require auth to view history
@@ -473,6 +475,84 @@ export default function Sidebar({
         </div>
       </div>
 
+      {/* User Profile */}
+      <div className="p-2 border-t border-border">
+        {isAuthenticated && user ? (
+          isCollapsed ? (
+            <button
+              onClick={() => setIsCollapsed(false)}
+              className="w-full flex items-center justify-center p-2 rounded-lg hover:bg-surface-hover transition-colors"
+              title={user.name || user.email}
+            >
+              {user.picture ? (
+                <Image
+                  src={user.picture}
+                  alt={user.name || "User"}
+                  width={28}
+                  height={28}
+                  className="w-7 h-7 rounded-full object-cover"
+                />
+              ) : (
+                <div className="w-7 h-7 rounded-full bg-primary/15 flex items-center justify-center">
+                  <span className="text-xs font-semibold text-primary">
+                    {(user.name || user.email || "U").charAt(0).toUpperCase()}
+                  </span>
+                </div>
+              )}
+            </button>
+          ) : (
+            <div className="flex items-center gap-3 p-2">
+              {user.picture ? (
+                <Image
+                  src={user.picture}
+                  alt={user.name || "User"}
+                  width={32}
+                  height={32}
+                  className="w-8 h-8 rounded-full object-cover flex-shrink-0"
+                />
+              ) : (
+                <div className="w-8 h-8 rounded-full bg-primary/15 flex items-center justify-center flex-shrink-0">
+                  <span className="text-sm font-semibold text-primary">
+                    {(user.name || user.email || "U").charAt(0).toUpperCase()}
+                  </span>
+                </div>
+              )}
+              <div className="flex-1 min-w-0">
+                {user.name && (
+                  <p className="text-sm font-medium text-foreground truncate">{user.name}</p>
+                )}
+                <p className="text-xs text-text-muted truncate">{user.email}</p>
+              </div>
+              <button
+                onClick={signOut}
+                className="p-1.5 rounded-lg hover:bg-error/10 transition-colors flex-shrink-0"
+                title="Sign out"
+              >
+                <LogOut className="w-4 h-4 text-text-muted hover:text-error" />
+              </button>
+            </div>
+          )
+        ) : isValyuMode ? (
+          isCollapsed ? (
+            <button
+              onClick={openSignInModal}
+              className="w-full flex items-center justify-center p-2 rounded-lg hover:bg-surface-hover transition-colors"
+              title="Sign in"
+            >
+              <UserIcon className="w-5 h-5 text-text-muted" />
+            </button>
+          ) : (
+            <button
+              onClick={openSignInModal}
+              className="w-full flex items-center gap-3 p-3 rounded-lg hover:bg-surface-hover transition-colors text-text-muted text-left"
+            >
+              <UserIcon className="w-5 h-5 flex-shrink-0" />
+              <span className="text-sm">Sign in</span>
+            </button>
+          )
+        ) : null}
+      </div>
+
       {/* Edge Toggle Handle */}
       <div
         className="absolute -right-3 top-1/2 -translate-y-1/2 z-50 cursor-pointer group"
@@ -695,6 +775,50 @@ export default function Sidebar({
             </span>
           </button>
         </div>
+      </div>
+
+      {/* User Profile (Mobile) */}
+      <div className="p-2 border-t border-border">
+        {isAuthenticated && user ? (
+          <div className="flex items-center gap-3 p-2">
+            {user.picture ? (
+              <Image
+                src={user.picture}
+                alt={user.name || "User"}
+                width={32}
+                height={32}
+                className="w-8 h-8 rounded-full object-cover flex-shrink-0"
+              />
+            ) : (
+              <div className="w-8 h-8 rounded-full bg-primary/15 flex items-center justify-center flex-shrink-0">
+                <span className="text-sm font-semibold text-primary">
+                  {(user.name || user.email || "U").charAt(0).toUpperCase()}
+                </span>
+              </div>
+            )}
+            <div className="flex-1 min-w-0">
+              {user.name && (
+                <p className="text-sm font-medium text-foreground truncate">{user.name}</p>
+              )}
+              <p className="text-xs text-text-muted truncate">{user.email}</p>
+            </div>
+            <button
+              onClick={signOut}
+              className="p-1.5 rounded-lg hover:bg-error/10 transition-colors flex-shrink-0"
+              title="Sign out"
+            >
+              <LogOut className="w-4 h-4 text-text-muted hover:text-error" />
+            </button>
+          </div>
+        ) : isValyuMode ? (
+          <button
+            onClick={openSignInModal}
+            className="w-full flex items-center gap-3 p-3 rounded-lg hover:bg-surface-hover transition-colors text-text-muted text-left"
+          >
+            <UserIcon className="w-5 h-5 flex-shrink-0" />
+            <span className="text-sm">Sign in</span>
+          </button>
+        ) : null}
       </div>
     </aside>
 
