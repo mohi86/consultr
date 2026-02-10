@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
+import { PostHogProvider } from './providers';
 import { AuthInitializer } from "@/app/components/auth/auth-initializer";
 
 const geistSans = Geist({
@@ -48,7 +49,7 @@ export const metadata: Metadata = {
   openGraph: {
     title: "Consult Ralph | AI-Powered Deep Research for Consultants",
     description:
-      "Generate comprehensive research reports in minutes. AI-powered deep research for due diligence, market analysis, and competitive intelligence. Built for consultants at top firms.",
+      "Generate comprehensive research reports in minutes. AI-powered deep research for due diligence, market analysis, and competitive intelligence. Built for solo consultants, teams and consultants at top firms.",
     type: "website",
     siteName: "Consult Ralph",
     locale: "en_US",
@@ -99,7 +100,9 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
-        <AuthInitializer>{children}</AuthInitializer>
+        <PostHogProvider>
+          <AuthInitializer>{children}</AuthInitializer>
+        </PostHogProvider>
       </body>
     </html>
   );
