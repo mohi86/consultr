@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from "next/server";
+﻿import { NextRequest, NextResponse } from "next/server";
 import { Resend } from "resend";
 import { EnterpriseInquiryEmail } from "@/app/lib/email-templates/enterprise-inquiry";
 
@@ -60,10 +60,10 @@ export async function POST(req: NextRequest) {
     });
 
     await resend.emails.send({
-      from: "ConsultRalph Enterprise <support@valyu.ai>",
+      from: "ConsultR Enterprise <support@valyu.ai>",
       to: ENTERPRISE_RECIPIENTS,
       replyTo: contactEmail,
-      subject: `Enterprise Inquiry from ConsultRalph - ${companyName}`,
+      subject: `Enterprise Inquiry from ConsultR - ${companyName}`,
       html: emailHtml,
     });
 
@@ -79,3 +79,4 @@ export async function POST(req: NextRequest) {
     );
   }
 }
+

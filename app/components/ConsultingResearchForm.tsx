@@ -27,6 +27,8 @@ type ResearchType =
   | "industry"
   | "custom";
 
+type ResearchMode = "fast" | "standard" | "heavy";
+
 const researchTypes = [
   {
     id: "company" as ResearchType,
@@ -73,6 +75,12 @@ const quickExamples = {
   custom: [],
 };
 
+const researchModeDurations: Record<ResearchMode, string> = {
+  fast: "5-10 minutes",
+  standard: "10-20 minutes",
+  heavy: "up to 90 minutes",
+};
+
 export default function ConsultingResearchForm({
   onTaskCreated,
   isResearching,
@@ -83,6 +91,7 @@ export default function ConsultingResearchForm({
   const [showAdvanced, setShowAdvanced] = useState(false);
   const [clientContext, setClientContext] = useState("");
   const [specificQuestions, setSpecificQuestions] = useState("");
+  const [researchMode, setResearchMode] = useState<ResearchMode>("fast");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -91,6 +100,7 @@ export default function ConsultingResearchForm({
   const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
 
   const selectedType = researchTypes.find((t) => t.id === researchType)!;
+  const selectedModeDuration = researchModeDurations[researchMode];
   const isValyuMode = APP_MODE !== "self-hosted";
 
   // Restore form data from localStorage on mount
@@ -104,6 +114,9 @@ export default function ConsultingResearchForm({
         setResearchFocus(data.researchFocus);
         setClientContext(data.clientContext);
         setSpecificQuestions(data.specificQuestions);
+        if (data.researchMode === "fast" || data.researchMode === "standard" || data.researchMode === "heavy") {
+          setResearchMode(data.researchMode);
+        }
         // Clear the saved data after restoring
         localStorage.removeItem("consultralph_pending_research");
       } catch (e) {
@@ -130,6 +143,7 @@ export default function ConsultingResearchForm({
         researchFocus: researchFocus.trim(),
         clientContext: clientContext.trim(),
         specificQuestions: specificQuestions.trim(),
+        researchMode,
       };
       localStorage.setItem("consultralph_pending_research", JSON.stringify(formData));
       openSignInModal();
@@ -159,6 +173,7 @@ export default function ConsultingResearchForm({
           researchFocus: researchFocus.trim(),
           clientContext: clientContext.trim(),
           specificQuestions: specificQuestions.trim(),
+          researchMode,
         }),
       });
 
@@ -336,6 +351,29 @@ export default function ConsultingResearchForm({
                 disabled={isSubmitting || isResearching}
               />
             </div>
+
+            <div>
+              <label
+                htmlFor="researchMode"
+                className="block text-sm sm:text-base font-medium mb-2"
+              >
+                Research Mode
+              </label>
+              <select
+                id="researchMode"
+                value={researchMode}
+                onChange={(e) => setResearchMode(e.target.value as ResearchMode)}
+                className="input-field text-base"
+                disabled={isSubmitting || isResearching}
+              >
+                <option value="fast">Fast (~5 min)</option>
+                <option value="standard">Standard (10-20 min)</option>
+                <option value="heavy">Heavy (up to ~90 min)</option>
+              </select>
+              <p className="text-xs sm:text-sm text-text-muted mt-2">
+                Choose fast for quick answers, standard for balanced depth, or heavy for complex analysis.
+              </p>
+            </div>
           </div>
         )}
       </div>
@@ -368,7 +406,7 @@ export default function ConsultingResearchForm({
 
       {/* Info Text */}
       <p className="text-xs sm:text-sm text-text-muted text-center px-2">
-        Takes <strong>5-10 minutes</strong>. You&apos;ll receive PowerPoint slides, Excel spreadsheet, Word document, and PDF report.
+        Takes <strong>{selectedModeDuration}</strong>. You&apos;ll receive PowerPoint slides, Excel spreadsheet, Word document, and PDF report.{" "}
         <strong>Run multiple research projects at once.</strong>
       </p>
     </form>

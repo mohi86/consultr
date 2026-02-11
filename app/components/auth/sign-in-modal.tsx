@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useState } from "react";
 import { Loader2 } from "lucide-react";
@@ -58,7 +58,7 @@ export function SignInModal({ open, onOpenChange }: SignInModalProps) {
       <DialogContent className="space-y-6">
         <div className="space-y-3">
           <p className="text-center text-base font-medium text-foreground">
-            ConsultRalph
+            ConsultR
           </p>
           <p className="text-center text-sm text-muted-foreground">
             Valyu is the Search API for AI knowledge work. Get access to comprehensive research reports, market analysis, and strategic insights.
@@ -97,3 +97,4 @@ export function SignInModal({ open, onOpenChange }: SignInModalProps) {
     </Dialog>
   );
 }
+

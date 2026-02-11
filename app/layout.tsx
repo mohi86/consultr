@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+﻿import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { PostHogProvider } from './providers';
@@ -16,9 +16,9 @@ const geistMono = Geist_Mono({
 
 export const metadata: Metadata = {
   metadataBase: new URL(
-    process.env.NEXT_PUBLIC_APP_URL || "https://consultralph.com"
+    process.env.NEXT_PUBLIC_APP_URL || "https://ConsultR.com"
   ),
-  title: "Consult Ralph | AI-Powered Deep Research for Consultants",
+  title: "ConsultR | AI-Powered Deep Research for Consultants",
   description:
     "Generate comprehensive research reports for due diligence, market analysis, competitive landscapes, and strategic insights. Built for consultants at top firms. EY, Deloitte, PwC, KPMG, McKinsey, BCG, Bain, investment banks and any consultant",
   keywords: [
@@ -33,9 +33,9 @@ export const metadata: Metadata = {
     "EY",
     ""
   ],
-  authors: [{ name: "ConsultRalph Intelligence" }],
-  creator: "ConsultRalph Intelligence",
-  publisher: "ConsultRalph Intelligence",
+  authors: [{ name: "ConsultR Intelligence" }],
+  creator: "ConsultR Intelligence",
+  publisher: "ConsultR Intelligence",
   icons: {
     icon: [
       { url: "/favicon-16x16.png", sizes: "16x16", type: "image/png" },
@@ -47,24 +47,24 @@ export const metadata: Metadata = {
     ],
   },
   openGraph: {
-    title: "Consult Ralph | AI-Powered Deep Research for Consultants",
+    title: "ConsultR | AI-Powered Deep Research for Consultants",
     description:
       "Generate comprehensive research reports in minutes. AI-powered deep research for due diligence, market analysis, and competitive intelligence. Built for solo consultants, teams and consultants at top firms.",
     type: "website",
-    siteName: "Consult Ralph",
+    siteName: "ConsultR",
     locale: "en_US",
     images: [
       {
         url: "/og-image.png",
         width: 1200,
         height: 630,
-        alt: "Consult Ralph - AI-Powered Deep Research",
+        alt: "ConsultR - AI-Powered Deep Research",
       },
     ],
   },
   twitter: {
     card: "summary_large_image",
-    title: "Consult Ralph | AI-Powered Deep Research",
+    title: "ConsultR | AI-Powered Deep Research",
     description:
       "Generate comprehensive research reports in minutes. AI-powered deep research for due diligence, market analysis, and competitive intelligence.",
     creator: "@valaboratory",
@@ -107,3 +107,5 @@ export default function RootLayout({
     </html>
   );
 }
+
+

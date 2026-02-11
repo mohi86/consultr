@@ -9,7 +9,7 @@ import Sidebar from "./components/Sidebar";
 import ExampleReports from "./components/ExampleReports";
 import GitHubCorner from "./components/GitHubCorner";
 import { SignInModal } from "./components/auth";
-import { X } from "lucide-react";
+import { X, Building2, TrendingUp, Users, FileText } from "lucide-react";
 import { DottedGlowBackground } from "@/components/ui/dotted-glow-background";
 import { ResearchHistoryItem, saveToHistory, updateHistoryStatus } from "./lib/researchHistory";
 import { useAuthStore } from "./stores/auth-store";
@@ -372,7 +372,7 @@ function HomeContent() {
     }
   }, []);
 
-  // No autoplay — user clicks play via video controls
+  // No autoplay - user clicks play via video controls
 
 
   const handleIntroEnd = () => {
@@ -391,7 +391,7 @@ function HomeContent() {
 
   return (
     <div className="min-h-screen bg-background">
-      {/* First-time intro video — Cinematic Noir */}
+      {/* First-time intro video - Cinematic Noir */}
       {showIntro && (
         <div className="fixed inset-0 z-[100] bg-[#0a0a0a] flex flex-col items-center justify-center px-4 sm:px-8 overflow-hidden">
           {/* Film grain texture overlay */}
@@ -411,7 +411,7 @@ function HomeContent() {
             }}
           />
 
-          {/* Skip intro — top right */}
+          {/* Skip intro - top right */}
           <button
             onClick={handleIntroEnd}
             className="intro-fade-in absolute top-6 right-6 sm:top-8 sm:right-8 z-20 text-white hover:text-white transition-all duration-300 text-sm sm:text-base tracking-widest uppercase px-6 py-3 border border-white/40 hover:border-white/70 hover:backdrop-blur-sm rounded-md"
@@ -425,8 +425,8 @@ function HomeContent() {
             {/* Ralph mascot + intro text */}
             <div className="flex items-center gap-4 sm:gap-5 mb-6 sm:mb-8 intro-fade-up" style={{ animationDelay: "0.2s" }}>
               <Image
-                src="/consultralph-transparent.png"
-                alt="ConsultRalph"
+                src="/icon.png"
+                alt="ConsultR"
                 width={72}
                 height={72}
                 className="w-12 h-12 sm:w-14 sm:h-14 md:w-[72px] md:h-[72px] object-contain flex-shrink-0"
@@ -497,7 +497,7 @@ function HomeContent() {
         aria-label="Toggle menu"
       >
         <Image
-          src="/consultralph.png"
+          src="/icon.png"
           alt="Menu"
           width={32}
           height={32}
@@ -566,7 +566,7 @@ function HomeContent() {
               <div className="text-center mb-6 sm:mb-8 max-w-3xl">
                 <div className="flex flex-col-reverse md:flex-row items-center md:items-end justify-center gap-2 sm:gap-3 mb-4">
                   <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold md:mb-4">
-                    <span className="text-foreground">ConsultRalph</span>
+                    <span className="text-foreground">ConsultR</span>
                   </h1>
                   <div className="relative group cursor-pointer" onClick={() => !isVideoPlaying && setIsVideoPlaying(true)}>
                     <div className="relative w-24 h-24 sm:w-28 sm:h-28 md:w-44 md:h-44">
@@ -580,8 +580,8 @@ function HomeContent() {
                         />
                       ) : (
                         <Image
-                          src="/consultralph.png"
-                          alt="Consult Ralph"
+                          src="/icon.png"
+                          alt="ConsultR"
                           width={176}
                           height={176}
                           className="w-full h-full object-contain group-hover:scale-105 transition-transform"
@@ -645,7 +645,7 @@ function HomeContent() {
               {/* Features */}
               <div className="mt-8 sm:mt-12 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4 sm:gap-6 max-w-5xl w-full px-2">
                 <div className="card text-center">
-                  <div className="text-3xl sm:text-4xl mb-2">📊</div>
+                  <Building2 className="w-8 h-8 mx-auto mb-2 text-primary" />
                   <h3 className="font-semibold text-sm sm:text-base mb-1">Due Diligence</h3>
                   <p className="text-xs sm:text-sm text-text-muted">
                     Comprehensive company research with financials, risks, and
@@ -653,7 +653,7 @@ function HomeContent() {
                   </p>
                 </div>
                 <div className="card text-center">
-                  <div className="text-3xl sm:text-4xl mb-2">🎯</div>
+                  <TrendingUp className="w-8 h-8 mx-auto mb-2 text-primary" />
                   <h3 className="font-semibold text-sm sm:text-base mb-1">Market Analysis</h3>
                   <p className="text-xs sm:text-sm text-text-muted">
                     TAM/SAM/SOM sizing, industry trends, growth drivers, and key
@@ -661,14 +661,14 @@ function HomeContent() {
                   </p>
                 </div>
                 <div className="card text-center">
-                  <div className="text-3xl sm:text-4xl mb-2">⚔️</div>
+                  <Users className="w-8 h-8 mx-auto mb-2 text-primary" />
                   <h3 className="font-semibold text-sm sm:text-base mb-1">Competitive Intel</h3>
                   <p className="text-xs sm:text-sm text-text-muted">
                     Competitor mapping, SWOT analysis, and strategic positioning
                   </p>
                 </div>
                 <div className="card text-center">
-                  <div className="text-3xl sm:text-4xl mb-2">📑</div>
+                  <FileText className="w-8 h-8 mx-auto mb-2 text-primary" />
                   <h3 className="font-semibold text-sm sm:text-base mb-1">Client-Ready Deliverables</h3>
                   <p className="text-xs sm:text-sm text-text-muted">
                     PowerPoint decks, Excel spreadsheets, Word docs, and PDF reports
@@ -700,7 +700,7 @@ function HomeContent() {
                 <div className="flex items-center gap-2 sm:gap-3">
                   <div className="relative w-10 h-10 sm:w-12 sm:h-12">
                     <Image
-                      src="/consultralph.png"
+                      src="/icon.png"
                       alt="Ralph"
                       width={48}
                       height={48}
@@ -709,7 +709,7 @@ function HomeContent() {
                   </div>
                   <div>
                     <h1 className="text-lg sm:text-xl font-bold">
-                      <span className="gradient-text">ConsultRalph</span>
+                      <span className="gradient-text">ConsultR</span>
                     </h1>
                     {currentResearchTitle && (
                       <p className="text-xs sm:text-sm text-text-muted">
@@ -748,3 +748,4 @@ export default function Home() {
     </Suspense>
   );
 }
+

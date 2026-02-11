@@ -13,6 +13,7 @@ const getValyuApiKey = () => {
 };
 
 type DeliverableType = "csv" | "xlsx" | "pptx" | "docx" | "pdf";
+type ResearchMode = "fast" | "standard" | "heavy";
 
 interface Deliverable {
   type: DeliverableType;
@@ -25,7 +26,8 @@ interface Deliverable {
 async function createResearchWithOAuth(
   accessToken: string,
   query: string,
-  deliverables: Deliverable[]
+  deliverables: Deliverable[],
+  mode: ResearchMode
 ) {
   const proxyUrl = `${VALYU_APP_URL}/api/oauth/proxy`;
 
@@ -40,7 +42,7 @@ async function createResearchWithOAuth(
     body: {
       query,
       deliverables,
-      mode: "fast",
+      mode,
       output_formats: ["markdown", "pdf"],
     },
   };
@@ -96,13 +98,14 @@ async function createResearchWithOAuth(
  */
 async function createResearchWithApiKey(
   query: string,
-  deliverables: Deliverable[]
+  deliverables: Deliverable[],
+  mode: ResearchMode
 ) {
   const valyu = new Valyu(getValyuApiKey());
   return valyu.deepresearch.create({
     query,
     deliverables,
-    mode: "fast",
+    mode,
   });
 }
 
@@ -120,6 +123,7 @@ export async function POST(request: NextRequest) {
       researchFocus,
       clientContext,
       specificQuestions,
+      researchMode,
     } = await request.json();
 
     if (!researchSubject) {
@@ -140,6 +144,7 @@ export async function POST(request: NextRequest) {
 
     // Build deliverables based on research type
     const deliverables = buildDeliverables(researchType, researchSubject);
+    const mode = normalizeResearchMode(researchMode);
 
     // Check mode first
     const selfHosted = isSelfHostedMode();
@@ -157,10 +162,10 @@ export async function POST(request: NextRequest) {
     // Route based on mode
     if (!selfHosted && accessToken) {
       // Valyu mode: use OAuth proxy (charges user's credits)
-      response = await createResearchWithOAuth(accessToken, query, deliverables);
+      response = await createResearchWithOAuth(accessToken, query, deliverables, mode);
     } else {
       // Self-hosted mode: use server API key
-      response = await createResearchWithApiKey(query, deliverables);
+      response = await createResearchWithApiKey(query, deliverables, mode);
     }
 
     return NextResponse.json({
@@ -192,6 +197,13 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json({ error: message }, { status: statusCode });
   }
+}
+
+function normalizeResearchMode(mode: unknown): ResearchMode {
+  if (mode === "fast" || mode === "standard" || mode === "heavy") {
+    return mode;
+  }
+  return "fast";
 }
 
 function buildResearchQuery(

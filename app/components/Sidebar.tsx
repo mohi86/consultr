@@ -263,8 +263,8 @@ export default function Sidebar({
           <Link href="/" onClick={() => onNewResearch?.()} className="flex items-center gap-3 hover:opacity-80 transition-opacity">
             <div className="relative w-9 h-9 flex-shrink-0">
               <Image
-                src="/consultralph.png"
-                alt="Consult Ralph"
+                src="/icon.png"
+                alt="ConsultR"
                 width={36}
                 height={36}
                 className="w-full h-full object-contain"
@@ -581,7 +581,7 @@ export default function Sidebar({
       <div
         className="absolute -right-3 top-1/2 -translate-y-1/2 z-50 cursor-pointer group"
         onClick={() => setIsCollapsed(!isCollapsed)}
-        title={isCollapsed ? "Expand sidebar (→)" : "Collapse sidebar (←)"}
+        title={isCollapsed ? "Expand sidebar (->)" : "Collapse sidebar (<-)"}
         role="button"
         tabIndex={0}
         onKeyDown={(e) => {
@@ -593,9 +593,9 @@ export default function Sidebar({
       >
         <div className="flex h-6 w-6 items-center justify-center rounded-full border bg-surface group-hover:bg-surface-hover shadow-sm transition-colors">
           {isCollapsed ? (
-            <span className="text-[10px] font-medium text-text-muted group-hover:text-foreground">→</span>
+            <span className="text-[10px] font-medium text-text-muted group-hover:text-foreground">-&gt;</span>
           ) : (
-            <span className="text-[10px] font-medium text-text-muted group-hover:text-foreground">←</span>
+            <span className="text-[10px] font-medium text-text-muted group-hover:text-foreground">&lt;-</span>
           )}
         </div>
       </div>
@@ -613,8 +613,8 @@ export default function Sidebar({
           <Link href="/" onClick={() => onNewResearch?.()} className="flex items-center gap-3 hover:opacity-80 transition-opacity">
             <div className="relative w-9 h-9 flex-shrink-0">
               <Image
-                src="/consultralph.png"
-                alt="Consult Ralph"
+                src="/icon.png"
+                alt="ConsultR"
                 width={36}
                 height={36}
                 className="w-full h-full object-contain"
@@ -854,3 +854,4 @@ export default function Sidebar({
   </>
   );
 }
+

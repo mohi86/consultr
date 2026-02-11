@@ -1,4 +1,4 @@
-interface EnterpriseInquiryEmailProps {
+﻿interface EnterpriseInquiryEmailProps {
   companyName: string;
   companySize?: string;
   industry?: string;
@@ -32,7 +32,7 @@ export function EnterpriseInquiryEmail({
 
     <!-- Header -->
     <div style="margin-bottom: 32px;">
-      <h1 style="margin: 0 0 4px 0; font-size: 18px; font-weight: 600; color: #000000;">ConsultRalph</h1>
+      <h1 style="margin: 0 0 4px 0; font-size: 18px; font-weight: 600; color: #000000;">ConsultR</h1>
       <p style="margin: 0; font-size: 14px; color: #666666;">New Enterprise Inquiry${bookedCall ? " - Call Booked" : ""}</p>
     </div>
 
@@ -67,7 +67,7 @@ export function EnterpriseInquiryEmail({
 
     <!-- Footer -->
     <div style="margin-top: 40px; padding-top: 20px; border-top: 1px solid #e5e7eb;">
-      <p style="margin: 0; font-size: 12px; color: #999999;">ConsultRalph by Valyu</p>
+      <p style="margin: 0; font-size: 12px; color: #999999;">ConsultR by Valyu</p>
     </div>
 
   </div>
@@ -75,3 +75,4 @@ export function EnterpriseInquiryEmail({
 </html>
   `.trim();
 }
+

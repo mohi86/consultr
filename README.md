@@ -1,8 +1,6 @@
-# [consultralph.com](https://consultralph.com)
+﻿# ![Consultr]
 
-![Ralph](consultralph.png)
-
-**Consult Ralph** is an autonomous deep research AI agent for consultants. It generates comprehensive due diligence reports, market analyses, competitive landscapes, and strategic insights in minutes. It can also run multiple research tasks simultaneously, like a swarm of agents completing in minutes what would normally take days or weeks or months.
+**ConsultR** is an autonomous deep research AI agent for consultants. It generates comprehensive due diligence reports, market analyses, competitive landscapes, and strategic insights in minutes. It can also run multiple research tasks simultaneously, like a swarm of agents completing in minutes what would normally take days or weeks or months.
 
 Built for consultants at any top firms: EY, Deloitte, PwC, KPMG, McKinsey, BCG, Bain, investment banks etc.
 
@@ -10,11 +8,11 @@ Built for consultants at any top firms: EY, Deloitte, PwC, KPMG, McKinsey, BCG, 
 
 This tool transforms hours of manual research into minutes of automated intelligence gathering. Input your research topic, and receive:
 
-- **📄 Comprehensive PDF Report** - Detailed analysis with executive summary, findings, and recommendations
-- **📊 Data Spreadsheet (CSV)** - Structured data, competitor comparisons, and key metrics
-- **📝 Executive Summary (DOCX)** - One-page briefing document for leadership presentations
-- **🎯 PowerPoint Deck (PPTX)** - Presentation-ready slides for client meetings
-- **🔗 Cited Sources** - All findings backed by verifiable sources
+- **ðŸ“„ Comprehensive PDF Report** - Detailed analysis with executive summary, findings, and recommendations
+- **ðŸ“Š Data Spreadsheet (CSV)** - Structured data, competitor comparisons, and key metrics
+- **ðŸ“ Executive Summary (DOCX)** - One-page briefing document for leadership presentations
+- **ðŸŽ¯ PowerPoint Deck (PPTX)** - Presentation-ready slides for client meetings
+- **ðŸ”— Cited Sources** - All findings backed by verifiable sources
 
 ## Research Types
 
@@ -37,7 +35,7 @@ This tool transforms hours of manual research into minutes of automated intellig
 
 ## App Modes
 
-ConsultRalph supports two deployment modes controlled by the `NEXT_PUBLIC_APP_MODE` environment variable:
+ConsultR supports two deployment modes controlled by the `NEXT_PUBLIC_APP_MODE` environment variable:
 
 ### Self-Hosted Mode (Default)
 
@@ -45,7 +43,7 @@ ConsultRalph supports two deployment modes controlled by the `NEXT_PUBLIC_APP_MO
 NEXT_PUBLIC_APP_MODE=self-hosted
 ```
 
-- **No user authentication required** — anyone with access to the app can run research
+- **No user authentication required** â€” anyone with access to the app can run research
 - Uses a single **server-side Valyu API key** (`VALYU_API_KEY`) for all requests
 - All research costs are billed to the API key owner
 - Ideal for internal team deployments, personal use, or private instances
@@ -60,7 +58,7 @@ NEXT_PUBLIC_APP_MODE=valyu
 - **Requires user authentication** via OAuth 2.0 with PKCE (Valyu as identity provider)
 - Each user signs in with their Valyu account and uses their own credits
 - Research costs are billed to the individual user's Valyu account
-- Ideal for public-facing deployments like [consultralph.com](https://consultralph.com)
+- Ideal for public-facing deployments like [ConsultR.com](https://ConsultR.com)
 - Requires OAuth configuration: `NEXT_PUBLIC_VALYU_CLIENT_ID`, `VALYU_CLIENT_SECRET`, `NEXT_PUBLIC_VALYU_AUTH_URL`, `VALYU_APP_URL`, and `NEXT_PUBLIC_REDIRECT_URI`
 
 ## Tech Stack
@@ -88,8 +86,8 @@ NEXT_PUBLIC_APP_MODE=valyu
 
 1. **Clone the repository**
    ```bash
-   git clone https://github.com/unicodeveloper/consultralph.git
-   cd consultralph
+   git clone https://github.com/unicodeveloper/ConsultR.git
+   cd ConsultR
    ```
 
 2. **Install dependencies**
@@ -191,39 +189,39 @@ CMD ["npm", "start"]
 ## Project Structure
 
 ```
-consultralph/
-├── app/
-│   ├── api/
-│   │   └── consulting-research/
-│   │       ├── route.ts              # Create research task
-│   │       ├── status/route.ts       # Get task status
-│   │       ├── public-status/route.ts # Public report access
-│   │       └── cancel/route.ts       # Cancel task
-│   ├── components/
-│   │   ├── ConsultingResearchForm.tsx # Main research form
-│   │   ├── ResearchResults.tsx        # Results display
-│   │   ├── ResearchActivityFeed.tsx   # Live activity feed
-│   │   ├── Sidebar.tsx                # Navigation sidebar
-│   │   ├── ExampleReports.tsx         # Example report cards
-│   │   ├── GitHubCorner.tsx           # GitHub link
-│   │   └── auth/                      # OAuth components
-│   │       ├── sign-in-modal.tsx
-│   │       ├── sign-in-panel.tsx
-│   │       └── auth-initializer.tsx
-│   ├── lib/
-│   │   ├── app-mode.ts               # Self-hosted vs Valyu mode helpers
-│   │   └── researchHistory.ts        # Local research history
-│   ├── stores/
-│   │   ├── auth-store.ts             # Auth state (Zustand)
-│   │   └── theme-store.ts            # Theme state (Zustand)
-│   ├── globals.css                    # Global styles & theme variables
-│   ├── layout.tsx                     # Root layout
-│   └── page.tsx                       # Main page
-├── public/                            # Static assets
-├── .env.example                       # Environment template
-├── package.json
-├── tsconfig.json
-└── README.md
+ConsultR/
+â”œâ”€â”€ app/
+â”‚   â”œâ”€â”€ api/
+â”‚   â”‚   â””â”€â”€ consulting-research/
+â”‚   â”‚       â”œâ”€â”€ route.ts              # Create research task
+â”‚   â”‚       â”œâ”€â”€ status/route.ts       # Get task status
+â”‚   â”‚       â”œâ”€â”€ public-status/route.ts # Public report access
+â”‚   â”‚       â””â”€â”€ cancel/route.ts       # Cancel task
+â”‚   â”œâ”€â”€ components/
+â”‚   â”‚   â”œâ”€â”€ ConsultingResearchForm.tsx # Main research form
+â”‚   â”‚   â”œâ”€â”€ ResearchResults.tsx        # Results display
+â”‚   â”‚   â”œâ”€â”€ ResearchActivityFeed.tsx   # Live activity feed
+â”‚   â”‚   â”œâ”€â”€ Sidebar.tsx                # Navigation sidebar
+â”‚   â”‚   â”œâ”€â”€ ExampleReports.tsx         # Example report cards
+â”‚   â”‚   â”œâ”€â”€ GitHubCorner.tsx           # GitHub link
+â”‚   â”‚   â””â”€â”€ auth/                      # OAuth components
+â”‚   â”‚       â”œâ”€â”€ sign-in-modal.tsx
+â”‚   â”‚       â”œâ”€â”€ sign-in-panel.tsx
+â”‚   â”‚       â””â”€â”€ auth-initializer.tsx
+â”‚   â”œâ”€â”€ lib/
+â”‚   â”‚   â”œâ”€â”€ app-mode.ts               # Self-hosted vs Valyu mode helpers
+â”‚   â”‚   â””â”€â”€ researchHistory.ts        # Local research history
+â”‚   â”œâ”€â”€ stores/
+â”‚   â”‚   â”œâ”€â”€ auth-store.ts             # Auth state (Zustand)
+â”‚   â”‚   â””â”€â”€ theme-store.ts            # Theme state (Zustand)
+â”‚   â”œâ”€â”€ globals.css                    # Global styles & theme variables
+â”‚   â”œâ”€â”€ layout.tsx                     # Root layout
+â”‚   â””â”€â”€ page.tsx                       # Main page
+â”œâ”€â”€ public/                            # Static assets
+â”œâ”€â”€ .env.example                       # Environment template
+â”œâ”€â”€ package.json
+â”œâ”€â”€ tsconfig.json
+â””â”€â”€ README.md
 ```
 
 ## API Reference
@@ -310,6 +308,7 @@ MIT License - see [LICENSE](LICENSE) for details.
 
 ---
 
-Built with ❤️ for consultants who value their time.
+Built with â¤ï¸ for consultants who value their time.
 
 **[Join our Discord](https://discord.com/invite/BhUWrFbHRa)** for updates and support.
+
