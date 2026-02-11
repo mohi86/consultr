@@ -6,7 +6,7 @@
 
 Built for consultants at any top firms: EY, Deloitte, PwC, KPMG, McKinsey, BCG, Bain, investment banks etc.
 
-CA: https://bags.fm/3CNE6yeTiEkGiaHpQ4XxhZks1KJeqTsFePPith3VBAGS
+[CA - Bags in support of the project](https://bags.fm/3CNE6yeTiEkGiaHpQ4XxhZks1KJeqTsFePPith3VBAGS)
 
 ## What It Does
 
