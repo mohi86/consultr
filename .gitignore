@@ -17,6 +17,7 @@
 /.next/
 /out/
 /demo-video
+demo-video
 
 # production
 /build
