@@ -15,7 +15,7 @@ const getValyuApiKey = () => {
 async function listViaProxy(
   accessToken: string,
   limit: number
-): Promise<{ success: boolean; data?: unknown[]; error?: string; status?: number }> {
+): Promise<{ tasks?: unknown[]; error?: string; status?: number }> {
   const proxyUrl = `${VALYU_APP_URL}/api/oauth/proxy`;
 
   const response = await fetch(proxyUrl, {
@@ -32,12 +32,14 @@ async function listViaProxy(
 
   if (!response.ok) {
     if (response.status === 401 || response.status === 403) {
-      return { success: false, error: "Session expired. Please sign in again.", status: 401 };
+      return { error: "Session expired. Please sign in again.", status: 401 };
     }
-    return { success: false, error: `API call failed: ${response.status}`, status: response.status };
+    return { error: `API call failed: ${response.status}`, status: response.status };
   }
 
-  return response.json();
+  // OAuth proxy returns the raw upstream response (an array of tasks)
+  const data = await response.json();
+  return { tasks: Array.isArray(data) ? data : (data.data || []) };
 }
 
 export async function GET(request: NextRequest) {
@@ -55,18 +57,19 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    let listData: { success?: boolean; data?: unknown[]; error?: string; status?: number };
+    let tasks: unknown[] = [];
 
     if (!selfHosted && accessToken) {
-      listData = await listViaProxy(accessToken, limit);
-      if (listData.error) {
-        const status = listData.status === 401 ? 401 : 500;
-        const body: Record<string, unknown> = { error: listData.error };
+      const result = await listViaProxy(accessToken, limit);
+      if (result.error) {
+        const status = result.status === 401 ? 401 : 500;
+        const body: Record<string, unknown> = { error: result.error };
         if (status === 401) {
           body.requiresReauth = true;
         }
         return NextResponse.json(body, { status });
       }
+      tasks = result.tasks || [];
     } else {
       const apiKeyId = process.env.VALYU_API_KEY_ID;
       if (!apiKeyId) {
@@ -77,12 +80,13 @@ export async function GET(request: NextRequest) {
       }
       const valyu = new Valyu(getValyuApiKey());
       const sdkResponse = await valyu.deepresearch.list({ apiKeyId, limit });
-      listData = sdkResponse as unknown as { success: boolean; data?: unknown[] };
+      const data = sdkResponse as unknown as { data?: unknown[] };
+      tasks = Array.isArray(sdkResponse) ? sdkResponse as unknown[] : (data.data || []);
     }
 
     return NextResponse.json({
       success: true,
-      tasks: listData.data || [],
+      tasks,
     });
   } catch (error) {
     console.error("Error listing research tasks:", error);
