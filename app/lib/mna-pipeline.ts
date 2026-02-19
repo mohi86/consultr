@@ -177,19 +177,11 @@ export function buildMnASearchConfig(
 ): MnASearchConfig {
   const sources = new Set<string>(["web", "academic"]);
 
-  const financeCategories: MnADataCategory[] = [
-    "sec_filings",
-    "financial_statements",
-    "insider_activity",
-  ];
-
-  for (const cat of categories) {
-    if (financeCategories.includes(cat)) {
-      sources.add("finance");
-    }
-    if (cat === "patents") {
-      sources.add("patent");
-    }
+  if (categories.some((c) => ["sec_filings", "financial_statements", "insider_activity"].includes(c))) {
+    sources.add("finance");
+  }
+  if (categories.includes("patents")) {
+    sources.add("patent");
   }
 
   return {

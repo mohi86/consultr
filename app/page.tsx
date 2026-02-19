@@ -11,6 +11,7 @@ import { Building2, TrendingUp, Users, FileText } from "lucide-react";
 import { DottedGlowBackground } from "@/components/ui/dotted-glow-background";
 import { ResearchHistoryItem, saveToHistory, updateHistoryStatus } from "./lib/researchHistory";
 import { useAuthStore } from "./stores/auth-store";
+import type { ResearchMode } from "./lib/research-types";
 
 interface ResearchResult {
   status: string;
@@ -50,7 +51,7 @@ function setResearchParam(taskId: string | null) {
   window.history.pushState(null, "", url.toString());
 }
 
-function getPollingInterval(mode?: string): number {
+function getPollingInterval(mode?: ResearchMode): number {
   switch (mode) {
     case "max": return 30000;
     case "heavy": return 15000;
@@ -166,7 +167,7 @@ function HomeContent() {
   }, [initialResearchId, pollStatus]);
 
   const handleTaskCreated = useCallback(
-    (taskId: string, title: string, researchType: string, mode?: string) => {
+    (taskId: string, title: string, researchType: string, mode?: ResearchMode) => {
       clearPolling();
       activeTaskRef.current = taskId;
       setCurrentTaskId(taskId);

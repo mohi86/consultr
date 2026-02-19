@@ -1,8 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
 import { Valyu } from "valyu-js";
 import { isSelfHostedMode } from "@/app/lib/app-mode";
-import { gatherFinancialData, type MnADataCategory, ALL_MNA_CATEGORIES } from "@/app/lib/valyu-search";
+import { gatherFinancialData, emptyFinancialContext, type MnADataCategory, ALL_MNA_CATEGORIES } from "@/app/lib/valyu-search";
 import { buildMnAQuery, buildMnADeliverables, buildMnASearchConfig } from "@/app/lib/mna-pipeline";
+import type { ResearchMode } from "@/app/lib/research-types";
 
 const VALYU_APP_URL = process.env.VALYU_APP_URL || "https://platform.valyu.ai";
 
@@ -15,11 +16,58 @@ const getValyuApiKey = () => {
 };
 
 type DeliverableType = "csv" | "xlsx" | "pptx" | "docx" | "pdf";
-type ResearchMode = "fast" | "standard" | "heavy" | "max";
 
 interface Deliverable {
   type: DeliverableType;
   description: string;
+}
+
+/**
+ * Send a request through the OAuth proxy and handle common error cases.
+ */
+async function callOAuthProxy(
+  accessToken: string,
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any -- proxy body varies by research type
+  requestBody: { path: string; method: string; body: Record<string, any> }
+) {
+  const proxyUrl = `${VALYU_APP_URL}/api/oauth/proxy`;
+
+  const response = await fetch(proxyUrl, {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${accessToken}`,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(requestBody),
+  });
+
+  if (!response.ok) {
+    const errorText = await response.text();
+    console.error("[OAuth] Error response:", response.status, errorText.substring(0, 500));
+
+    let errorData;
+    try {
+      errorData = JSON.parse(errorText);
+    } catch {
+      errorData = {
+        message: errorText.length > 200
+          ? "Upstream service returned a non-standard error response"
+          : errorText,
+      };
+    }
+
+    if (response.status === 402) {
+      throw new Error("Insufficient credits. Please top up your Valyu account.");
+    }
+
+    if (response.status === 401 || response.status === 403) {
+      throw new Error(`Session expired. Please sign in again. (${response.status}: ${errorData.message || errorData.error || 'Unknown error'})`);
+    }
+
+    throw new Error(errorData.message || errorData.error || "Failed to create research");
+  }
+
+  return response.json();
 }
 
 /**
@@ -31,14 +79,7 @@ async function createResearchWithOAuth(
   deliverables: Deliverable[],
   mode: ResearchMode
 ) {
-  const proxyUrl = `${VALYU_APP_URL}/api/oauth/proxy`;
-
-  // Debug logging
-  console.log("[OAuth] Proxy URL:", proxyUrl);
-  console.log("[OAuth] Token (first 20 chars):", accessToken.substring(0, 20) + "...");
-  console.log("[OAuth] Token length:", accessToken.length);
-
-  const requestBody = {
+  return callOAuthProxy(accessToken, {
     path: "/v1/deepresearch/tasks",
     method: "POST",
     body: {
@@ -47,52 +88,7 @@ async function createResearchWithOAuth(
       mode,
       output_formats: ["markdown", "pdf"],
     },
-  };
-
-  console.log("[OAuth] Request body (without query):", {
-    path: requestBody.path,
-    method: requestBody.method,
-    body: { deliverables: requestBody.body.deliverables, mode: requestBody.body.mode },
   });
-
-  const response = await fetch(proxyUrl, {
-    method: "POST",
-    headers: {
-      Authorization: `Bearer ${accessToken}`,
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify(requestBody),
-  });
-
-  console.log("[OAuth] Response status:", response.status);
-  console.log("[OAuth] Response headers:", Object.fromEntries(response.headers.entries()));
-
-  if (!response.ok) {
-    const errorText = await response.text();
-    console.log("[OAuth] Error response body:", errorText);
-
-    let errorData;
-    try {
-      errorData = JSON.parse(errorText);
-    } catch {
-      errorData = { message: errorText };
-    }
-
-    // Check for credit errors
-    if (response.status === 402) {
-      throw new Error("Insufficient credits. Please top up your Valyu account.");
-    }
-
-    // Check for auth errors
-    if (response.status === 401 || response.status === 403) {
-      console.log("[OAuth] Auth error - token may be invalid or expired");
-      throw new Error(`Session expired. Please sign in again. (${response.status}: ${errorData.message || errorData.error || 'Unknown error'})`);
-    }
-
-    throw new Error(errorData.message || errorData.error || "Failed to create research");
-  }
-
-  return response.json();
 }
 
 /**
@@ -165,12 +161,7 @@ async function createMnAResearchWithOAuth(
 
   if (!serverApiKey) {
     console.warn("[OAuth M&A] No VALYU_API_KEY configured — skipping Phase 1 financial data gathering");
-    financialContext = {
-      results: [],
-      totalCharacters: 0,
-      categoriesSearched: 0,
-      categoriesSucceeded: 0,
-    };
+    financialContext = emptyFinancialContext();
   } else {
     try {
       const valyu = new Valyu(serverApiKey);
@@ -178,12 +169,7 @@ async function createMnAResearchWithOAuth(
     } catch (error) {
       const message = error instanceof Error ? error.message : String(error);
       console.error("[OAuth M&A] Phase 1 financial data gathering failed:", message);
-      financialContext = {
-        results: [],
-        totalCharacters: 0,
-        categoriesSearched: dataCategories.length,
-        categoriesSucceeded: 0,
-      };
+      financialContext = { ...emptyFinancialContext(), categoriesSearched: dataCategories.length };
     }
   }
 
@@ -192,9 +178,7 @@ async function createMnAResearchWithOAuth(
   const deliverables = buildMnADeliverables(targetCompany);
   const searchConfig = buildMnASearchConfig(dataCategories);
 
-  const proxyUrl = `${VALYU_APP_URL}/api/oauth/proxy`;
-
-  const requestBody = {
+  return callOAuthProxy(accessToken, {
     path: "/v1/deepresearch/tasks",
     method: "POST",
     body: {
@@ -204,45 +188,7 @@ async function createMnAResearchWithOAuth(
       output_formats: ["markdown", "pdf"],
       search: searchConfig,
     },
-  };
-
-  console.log("[OAuth M&A] Proxy URL:", proxyUrl);
-  console.log("[OAuth M&A] Target company:", targetCompany);
-  console.log("[OAuth M&A] Categories:", dataCategories);
-  console.log("[OAuth M&A] Phase 1 results:", financialContext.categoriesSucceeded, "/", financialContext.categoriesSearched, "categories succeeded");
-
-  const response = await fetch(proxyUrl, {
-    method: "POST",
-    headers: {
-      Authorization: `Bearer ${accessToken}`,
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify(requestBody),
   });
-
-  if (!response.ok) {
-    const errorText = await response.text();
-    console.error("[OAuth M&A] Error response body:", errorText);
-
-    let errorData;
-    try {
-      errorData = JSON.parse(errorText);
-    } catch {
-      errorData = { message: errorText };
-    }
-
-    if (response.status === 402) {
-      throw new Error("Insufficient credits. Please top up your Valyu account.");
-    }
-
-    if (response.status === 401 || response.status === 403) {
-      throw new Error(`Session expired. Please sign in again. (${response.status}: ${errorData.message || errorData.error || 'Unknown error'})`);
-    }
-
-    throw new Error(errorData.message || errorData.error || "Failed to create M&A research");
-  }
-
-  return response.json();
 }
 
 export async function POST(request: NextRequest) {

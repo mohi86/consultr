@@ -13,23 +13,23 @@ import {
   Loader2,
 } from "lucide-react";
 import { useAuthStore } from "@/app/stores/auth-store";
+import type { ResearchType, ResearchMode } from "@/app/lib/research-types";
 
 const APP_MODE = process.env.NEXT_PUBLIC_APP_MODE || "self-hosted";
 
+const subjectLabels: Record<ResearchType, string> = {
+  mna: "Target Company",
+  company: "Company Name",
+  market: "Market / Segment",
+  competitive: "Industry / Category",
+  industry: "Industry",
+  custom: "Research Topic",
+};
+
 interface ConsultingResearchFormProps {
-  onTaskCreated: (taskId: string, title: string, researchType: string, mode?: string) => void;
+  onTaskCreated: (taskId: string, title: string, researchType: string, mode?: ResearchMode) => void;
   isResearching: boolean;
 }
-
-type ResearchType =
-  | "mna"
-  | "company"
-  | "market"
-  | "competitive"
-  | "industry"
-  | "custom";
-
-type ResearchMode = "fast" | "standard" | "heavy" | "max";
 
 const researchTypes = [
   {
@@ -313,17 +313,7 @@ export default function ConsultingResearchForm({
       {/* Research Subject Input */}
       <div>
         <label htmlFor="researchSubject" className="block text-sm sm:text-base font-medium mb-2">
-          {researchType === "mna"
-            ? "Target Company"
-            : researchType === "company"
-            ? "Company Name"
-            : researchType === "market"
-            ? "Market / Segment"
-            : researchType === "competitive"
-            ? "Industry / Category"
-            : researchType === "industry"
-            ? "Industry"
-            : "Research Topic"}
+          {subjectLabels[researchType]}
         </label>
         <input
           type="text"
@@ -354,56 +344,57 @@ export default function ConsultingResearchForm({
         )}
       </div>
 
-      {/* M&A Data Categories */}
+      {/* M&A-specific fields */}
       {researchType === "mna" && (
-        <div>
-          <label className="block text-sm sm:text-base font-medium mb-3">
-            Data Categories
-          </label>
-          <div className="space-y-2">
-            {MNA_DATA_CATEGORIES.map((cat) => (
-              <label
-                key={cat.id}
-                className="flex items-center gap-3 cursor-pointer"
-              >
-                <input
-                  type="checkbox"
-                  checked={dataCategories.includes(cat.id)}
-                  onChange={(e) => {
-                    if (e.target.checked) {
-                      setDataCategories((prev) => [...prev, cat.id]);
-                    } else {
-                      setDataCategories((prev) =>
-                        prev.filter((c) => c !== cat.id)
-                      );
-                    }
-                  }}
-                  className="w-4 h-4 rounded border-border text-primary focus:ring-primary"
-                  disabled={isSubmitting || isResearching}
-                />
-                <span className="text-sm sm:text-base">{cat.label}</span>
-              </label>
-            ))}
+        <>
+          {/* Data Categories */}
+          <div>
+            <label className="block text-sm sm:text-base font-medium mb-3">
+              Data Categories
+            </label>
+            <div className="space-y-2">
+              {MNA_DATA_CATEGORIES.map((cat) => (
+                <label
+                  key={cat.id}
+                  className="flex items-center gap-3 cursor-pointer"
+                >
+                  <input
+                    type="checkbox"
+                    checked={dataCategories.includes(cat.id)}
+                    onChange={(e) => {
+                      if (e.target.checked) {
+                        setDataCategories((prev) => [...prev, cat.id]);
+                      } else {
+                        setDataCategories((prev) =>
+                          prev.filter((c) => c !== cat.id)
+                        );
+                      }
+                    }}
+                    className="w-4 h-4 rounded border-border text-primary focus:ring-primary"
+                    disabled={isSubmitting || isResearching}
+                  />
+                  <span className="text-sm sm:text-base">{cat.label}</span>
+                </label>
+              ))}
+            </div>
           </div>
-        </div>
-      )}
 
-      {/* M&A Deal Context */}
-      {researchType === "mna" && (
-        <div>
-          <label htmlFor="dealContext" className="block text-sm sm:text-base font-medium mb-2">
-            Deal Context{" "}
-            <span className="text-text-muted font-normal">(Optional)</span>
-          </label>
-          <textarea
-            id="dealContext"
-            value={dealContext}
-            onChange={(e) => setDealContext(e.target.value)}
-            placeholder="e.g., 'Evaluating as acquisition target for $2B+ deal...'"
-            className="input-field resize-none h-20 sm:h-24 text-base"
-            disabled={isSubmitting || isResearching}
-          />
-        </div>
+          {/* Deal Context */}
+          <div>
+            <label htmlFor="dealContext" className="block text-sm sm:text-base font-medium mb-2">
+              Deal Context{" "}
+              <span className="text-text-muted font-normal">(Optional)</span>
+            </label>
+            <textarea
+              id="dealContext"
+              value={dealContext}
+              onChange={(e) => setDealContext(e.target.value)}
+              placeholder="e.g., 'Evaluating as acquisition target for $2B+ deal...'"
+              className="input-field resize-none h-20 sm:h-24 text-base"
+              disabled={isSubmitting || isResearching}
+            />
+          </div>
+        </>
       )}
 
       {/* Research Focus */}

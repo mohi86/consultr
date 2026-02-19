@@ -25,14 +25,6 @@ export type MnADataCategory =
   | "patents"
   | "market_intelligence";
 
-export const ALL_MNA_CATEGORIES: MnADataCategory[] = [
-  "sec_filings",
-  "financial_statements",
-  "insider_activity",
-  "patents",
-  "market_intelligence",
-];
-
 export interface CategorySearchResult {
   category: MnADataCategory;
   label: string;
@@ -98,6 +90,12 @@ const MNA_DATA_CATEGORIES: Record<MnADataCategory, CategoryConfig> = {
   },
 };
 
+export const ALL_MNA_CATEGORIES = Object.keys(MNA_DATA_CATEGORIES) as MnADataCategory[];
+
+export function emptyFinancialContext(): FinancialContext {
+  return { results: [], totalCharacters: 0, categoriesSearched: 0, categoriesSucceeded: 0 };
+}
+
 // ---------------------------------------------------------------------------
 // Search functions
 // ---------------------------------------------------------------------------
@@ -137,7 +135,7 @@ export async function searchCategory(
   } catch (error) {
     const message =
       error instanceof Error ? error.message : "Unknown search error";
-    console.error(`[valyu-search] ${category} search failed:`, message);
+    console.error(`[valyu-search] ${category} search failed:`, error);
     return {
       category,
       label: config.label,
@@ -166,6 +164,14 @@ export async function gatherFinancialData(
     0
   );
   const categoriesSucceeded = categoryResults.filter((r) => r.success).length;
+
+  if (categoriesSucceeded === 0 && categoryResults.length > 0) {
+    console.error(
+      `[valyu-search] All ${categoryResults.length} category searches failed for "${companyName}". ` +
+      `Phase 1 financial enrichment will be empty. Errors: ` +
+      categoryResults.map((r) => `${r.category}: ${r.error}`).join("; ")
+    );
+  }
 
   return {
     results: categoryResults,
