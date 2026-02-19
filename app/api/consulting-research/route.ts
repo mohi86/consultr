@@ -107,6 +107,7 @@ async function createResearchWithApiKey(
   return valyu.deepresearch.create({
     query,
     deliverables,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any -- SDK types don't include "max" yet
     mode: mode as any,
   });
 }
@@ -137,6 +138,7 @@ async function createMnAResearchWithApiKey(
   return valyu.deepresearch.create({
     query,
     deliverables,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any -- SDK types don't include "max" yet
     mode: mode as any,
     outputFormats: ["markdown", "pdf"],
     search: searchConfig,

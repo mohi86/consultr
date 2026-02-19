@@ -70,6 +70,8 @@ function HomeContent() {
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(true);
   const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
   const [isVideoPlaying, setIsVideoPlaying] = useState(false);
+  // Track research mode for adaptive polling intervals
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [currentResearchMode, setCurrentResearchMode] = useState<string>("fast");
 
   const cancelledRef = useRef(false);
