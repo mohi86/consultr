@@ -5,6 +5,9 @@ import { gatherFinancialData, emptyFinancialContext, type MnADataCategory, ALL_M
 import { buildMnAQuery, buildMnADeliverables, buildMnASearchConfig } from "@/app/lib/mna-pipeline";
 import type { ResearchMode } from "@/app/lib/research-types";
 
+/** Allow larger request bodies for file uploads (base64-encoded, up to ~200MB) */
+export const maxDuration = 60;
+
 const VALYU_APP_URL = process.env.VALYU_APP_URL || "https://platform.valyu.ai";
 
 const getValyuApiKey = () => {
@@ -22,6 +25,13 @@ interface Deliverable {
   description: string;
 }
 
+interface FileAttachment {
+  data: string;
+  filename: string;
+  mediaType: string;
+  context?: string;
+}
+
 /**
  * Send a request through the OAuth proxy and handle common error cases.
  */
@@ -31,6 +41,7 @@ async function callOAuthProxy(
   requestBody: { path: string; method: string; body: Record<string, any> }
 ) {
   const proxyUrl = `${VALYU_APP_URL}/api/oauth/proxy`;
+
 
   const response = await fetch(proxyUrl, {
     method: "POST",
@@ -77,17 +88,27 @@ async function createResearchWithOAuth(
   accessToken: string,
   query: string,
   deliverables: Deliverable[],
-  mode: ResearchMode
+  mode: ResearchMode,
+  files?: FileAttachment[],
+  urls?: string[],
+  alertEmail?: { email: string; custom_url: string }
 ) {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any -- proxy body varies by research type
+  const body: Record<string, any> = {
+    query,
+    deliverables,
+    mode,
+    output_formats: ["markdown", "pdf"],
+  };
+
+  if (files && files.length > 0) body.files = files;
+  if (urls && urls.length > 0) body.urls = urls;
+  if (alertEmail) body.alert_email = alertEmail;
+
   return callOAuthProxy(accessToken, {
     path: "/v1/deepresearch/tasks",
     method: "POST",
-    body: {
-      query,
-      deliverables,
-      mode,
-      output_formats: ["markdown", "pdf"],
-    },
+    body,
   });
 }
 
@@ -97,15 +118,31 @@ async function createResearchWithOAuth(
 async function createResearchWithApiKey(
   query: string,
   deliverables: Deliverable[],
-  mode: ResearchMode
+  mode: ResearchMode,
+  files?: FileAttachment[],
+  urls?: string[],
+  alertEmail?: { email: string; custom_url: string }
 ) {
   const valyu = new Valyu(getValyuApiKey());
-  return valyu.deepresearch.create({
+
+  const options: Record<string, unknown> = {
     query,
     deliverables,
     // eslint-disable-next-line @typescript-eslint/no-explicit-any -- SDK types don't include "max" yet
     mode: mode as any,
-  });
+  };
+
+  if (files && files.length > 0) {
+    options.files = files;
+  }
+  if (urls && urls.length > 0) {
+    options.urls = urls;
+  }
+  if (alertEmail) {
+    options.alertEmail = alertEmail;
+  }
+
+  return valyu.deepresearch.create(options);
 }
 
 /**
@@ -208,7 +245,22 @@ export async function POST(request: NextRequest) {
       researchMode,
       dataCategories,
       dealContext,
-    } = await request.json();
+      files,
+      urls,
+      alertEmail,
+    } = await request.json() as {
+      researchType: string;
+      researchSubject: string;
+      researchFocus?: string;
+      clientContext?: string;
+      specificQuestions?: string;
+      researchMode?: string;
+      dataCategories?: string[];
+      dealContext?: string;
+      files?: FileAttachment[];
+      urls?: string[];
+      alertEmail?: string;
+    };
 
     if (!researchSubject) {
       return NextResponse.json(
@@ -218,6 +270,26 @@ export async function POST(request: NextRequest) {
     }
 
     const mode = normalizeResearchMode(researchMode);
+
+    // Validate files and urls limits
+    if (files && files.length > 10) {
+      return NextResponse.json(
+        { error: "Maximum 10 files allowed" },
+        { status: 400 }
+      );
+    }
+    if (urls && urls.length > 10) {
+      return NextResponse.json(
+        { error: "Maximum 10 URLs allowed" },
+        { status: 400 }
+      );
+    }
+
+    // Build alert_email object with report URL pointing back to this app
+    const appOrigin = new URL(request.url).origin;
+    const alertEmailObj = alertEmail
+      ? { email: alertEmail, custom_url: `${appOrigin}/?research={id}` }
+      : undefined;
 
     // Check mode first
     const selfHosted = isSelfHostedMode();
@@ -283,10 +355,10 @@ export async function POST(request: NextRequest) {
       // Route based on mode
       if (!selfHosted && accessToken) {
         // Valyu mode: use OAuth proxy (charges user's credits)
-        response = await createResearchWithOAuth(accessToken, query, deliverables, mode);
+        response = await createResearchWithOAuth(accessToken, query, deliverables, mode, files, urls, alertEmailObj);
       } else {
         // Self-hosted mode: use server API key
-        response = await createResearchWithApiKey(query, deliverables, mode);
+        response = await createResearchWithApiKey(query, deliverables, mode, files, urls, alertEmailObj);
       }
     }
 
