@@ -154,6 +154,53 @@ Expand "Advanced Options" to add:
 **Competitive Landscape:**
 > "Cloud Infrastructure Providers" with questions "What are the key differentiators between AWS, Azure, and GCP for enterprise customers?"
 
+## Desktop App (Electron, Windows)
+
+The self-hosted mode can be packaged as a native Windows desktop app while keeping Next.js SSR, routing, and API routes.
+
+### Desktop requirements
+
+- Windows 10/11 (x64)
+- Node.js 18+
+- `VALYU_API_KEY` set in a local `.env` file
+
+### Run desktop in development
+
+```bash
+npm run desktop:dev
+```
+
+This starts Next.js and opens Electron pointed at `http://127.0.0.1:3000` in forced self-hosted mode.
+
+### Build desktop app locally
+
+```bash
+npm run desktop:build:web
+npm run desktop:prepare
+npm run desktop:start
+```
+
+### Build Windows installer
+
+```bash
+npm run desktop:dist
+```
+
+Installer artifacts are generated in `dist-electron/`.
+
+### Desktop mode behavior
+
+- Desktop runtime forces `NEXT_PUBLIC_APP_MODE=self-hosted`.
+- Valyu OAuth mode is not used in desktop builds.
+
+### `.env` lookup order for desktop runtime
+
+1. `CONSULTR_ENV_FILE` (absolute path override)
+2. `<current working directory>/.env`
+3. `<project root>/.env` (dev/local runs)
+4. `<directory of executable>/.env`
+5. `<Electron userData>/.env`
+
 ## Deployment
 
 ### Railway (Recommended)
