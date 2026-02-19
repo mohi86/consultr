@@ -35,6 +35,8 @@ interface ResearchResult {
     content: string | Array<Record<string, unknown>>;
   }>;
   error?: string;
+  researchType?: string;
+  researchMode?: string;
 }
 
 // Helper to update URL search params without triggering navigation
@@ -48,6 +50,15 @@ function setResearchParam(taskId: string | null) {
   window.history.pushState(null, "", url.toString());
 }
 
+function getPollingInterval(mode?: string): number {
+  switch (mode) {
+    case "max": return 30000;
+    case "heavy": return 15000;
+    case "standard": return 10000;
+    default: return 5000;
+  }
+}
+
 function HomeContent() {
   const searchParams = useSearchParams();
   const initialResearchId = searchParams.get("research");
@@ -59,6 +70,7 @@ function HomeContent() {
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(true);
   const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
   const [isVideoPlaying, setIsVideoPlaying] = useState(false);
+  const [currentResearchMode, setCurrentResearchMode] = useState<string>("fast");
 
   const cancelledRef = useRef(false);
   const pollIntervalRef = useRef<NodeJS.Timeout | null>(null);
@@ -149,16 +161,19 @@ function HomeContent() {
   }, [initialResearchId, pollStatus]);
 
   const handleTaskCreated = useCallback(
-    (taskId: string, title: string, researchType: string) => {
+    (taskId: string, title: string, researchType: string, mode?: string) => {
       clearPolling();
       activeTaskRef.current = taskId;
       setCurrentTaskId(taskId);
       setCurrentResearchTitle(title);
+      setCurrentResearchMode(mode || "fast");
       setIsResearching(true);
       cancelledRef.current = false;
       setResearchResult({
         status: "queued",
         task_id: taskId,
+        researchType,
+        researchMode: mode,
       });
 
       // Update URL with research ID
@@ -173,9 +188,10 @@ function HomeContent() {
 
       pollStatus(taskId);
 
+      const interval = getPollingInterval(mode);
       pollIntervalRef.current = setInterval(() => {
         pollStatus(taskId);
-      }, 10000);
+      }, interval);
     },
     [clearPolling, pollStatus]
   );
