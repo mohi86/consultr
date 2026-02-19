@@ -1,8 +1,10 @@
 ﻿# ![Consultr]
 
-**ConsultR** is an autonomous deep research AI agent for consultants. It generates comprehensive due diligence reports, market analyses, competitive landscapes, and strategic insights in minutes. It can also run multiple research tasks simultaneously, like a swarm of agents completing in minutes what would normally take days or weeks or months.
+**ConsultR** is an autonomous deep research AI agent for consultants and analysts. It generates comprehensive due diligence reports, market analyses, competitive landscapes, and strategic insights in minutes. It can also run multiple research tasks simultaneously, like a swarm of agents completing in minutes what would normally take days or weeks or months.
 
 Built for consultants at any top firms: EY, Deloitte, PwC, KPMG, McKinsey, BCG, Bain, investment banks etc.
+
+**[Join our Discord](https://discord.gg/cY4RhVcwZU)** for updates and support.
 
 ## What It Does
 
@@ -357,5 +359,4 @@ MIT License - see [LICENSE](LICENSE) for details.
 
 Built with â¤ï¸ for consultants who value their time.
 
-**[Join our Discord](https://discord.com/invite/BhUWrFbHRa)** for updates and support.
-
+**[Join our Discord](https://discord.gg/cY4RhVcwZU)** for updates and support.

@@ -1,6 +1,12 @@
 import { NextRequest, NextResponse } from "next/server";
 import { Valyu } from "valyu-js";
 import { isSelfHostedMode } from "@/app/lib/app-mode";
+import { gatherFinancialData, emptyFinancialContext, type MnADataCategory, ALL_MNA_CATEGORIES } from "@/app/lib/valyu-search";
+import { buildMnAQuery, buildMnADeliverables, buildMnASearchConfig } from "@/app/lib/mna-pipeline";
+import type { ResearchMode } from "@/app/lib/research-types";
+
+/** Allow larger request bodies for file uploads (base64-encoded, up to ~200MB) */
+export const maxDuration = 60;
 
 const VALYU_APP_URL = process.env.VALYU_APP_URL || "https://platform.valyu.ai";
 
@@ -13,45 +19,29 @@ const getValyuApiKey = () => {
 };
 
 type DeliverableType = "csv" | "xlsx" | "pptx" | "docx" | "pdf";
-type ResearchMode = "fast" | "standard" | "heavy";
 
 interface Deliverable {
   type: DeliverableType;
   description: string;
 }
 
+interface FileAttachment {
+  data: string;
+  filename: string;
+  mediaType: string;
+  context?: string;
+}
+
 /**
- * Create research using OAuth proxy (user's credits)
+ * Send a request through the OAuth proxy and handle common error cases.
  */
-async function createResearchWithOAuth(
+async function callOAuthProxy(
   accessToken: string,
-  query: string,
-  deliverables: Deliverable[],
-  mode: ResearchMode
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any -- proxy body varies by research type
+  requestBody: { path: string; method: string; body: Record<string, any> }
 ) {
   const proxyUrl = `${VALYU_APP_URL}/api/oauth/proxy`;
 
-  // Debug logging
-  console.log("[OAuth] Proxy URL:", proxyUrl);
-  console.log("[OAuth] Token (first 20 chars):", accessToken.substring(0, 20) + "...");
-  console.log("[OAuth] Token length:", accessToken.length);
-
-  const requestBody = {
-    path: "/v1/deepresearch/tasks",
-    method: "POST",
-    body: {
-      query,
-      deliverables,
-      mode,
-      output_formats: ["markdown", "pdf"],
-    },
-  };
-
-  console.log("[OAuth] Request body (without query):", {
-    path: requestBody.path,
-    method: requestBody.method,
-    body: { deliverables: requestBody.body.deliverables, mode: requestBody.body.mode },
-  });
 
   const response = await fetch(proxyUrl, {
     method: "POST",
@@ -62,28 +52,26 @@ async function createResearchWithOAuth(
     body: JSON.stringify(requestBody),
   });
 
-  console.log("[OAuth] Response status:", response.status);
-  console.log("[OAuth] Response headers:", Object.fromEntries(response.headers.entries()));
-
   if (!response.ok) {
     const errorText = await response.text();
-    console.log("[OAuth] Error response body:", errorText);
+    console.error("[OAuth] Error response:", response.status, errorText.substring(0, 500));
 
     let errorData;
     try {
       errorData = JSON.parse(errorText);
     } catch {
-      errorData = { message: errorText };
+      errorData = {
+        message: errorText.length > 200
+          ? "Upstream service returned a non-standard error response"
+          : errorText,
+      };
     }
 
-    // Check for credit errors
     if (response.status === 402) {
       throw new Error("Insufficient credits. Please top up your Valyu account.");
     }
 
-    // Check for auth errors
     if (response.status === 401 || response.status === 403) {
-      console.log("[OAuth] Auth error - token may be invalid or expired");
       throw new Error(`Session expired. Please sign in again. (${response.status}: ${errorData.message || errorData.error || 'Unknown error'})`);
     }
 
@@ -94,18 +82,168 @@ async function createResearchWithOAuth(
 }
 
 /**
+ * Create research using OAuth proxy (user's credits)
+ */
+async function createResearchWithOAuth(
+  accessToken: string,
+  query: string,
+  deliverables: Deliverable[],
+  mode: ResearchMode,
+  files?: FileAttachment[],
+  urls?: string[],
+  alertEmail?: { email: string; custom_url: string }
+) {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any -- proxy body varies by research type
+  const body: Record<string, any> = {
+    query,
+    deliverables,
+    mode,
+    output_formats: ["markdown", "pdf"],
+  };
+
+  if (files && files.length > 0) body.files = files;
+  if (urls && urls.length > 0) body.urls = urls;
+  if (alertEmail) body.alert_email = alertEmail;
+
+  return callOAuthProxy(accessToken, {
+    path: "/v1/deepresearch/tasks",
+    method: "POST",
+    body,
+  });
+}
+
+/**
  * Create research using server API key (self-hosted mode)
  */
 async function createResearchWithApiKey(
   query: string,
   deliverables: Deliverable[],
-  mode: ResearchMode
+  mode: ResearchMode,
+  files?: FileAttachment[],
+  urls?: string[],
+  alertEmail?: { email: string; custom_url: string }
 ) {
   const valyu = new Valyu(getValyuApiKey());
-  return valyu.deepresearch.create({
+
+  const options: Record<string, unknown> = {
+    query,
+    deliverables,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any -- SDK types don't include "max" yet
+    mode: mode as any,
+  };
+
+  if (files && files.length > 0) {
+    options.files = files;
+  }
+  if (urls && urls.length > 0) {
+    options.urls = urls;
+  }
+  if (alertEmail) {
+    options.alertEmail = alertEmail;
+  }
+
+  return valyu.deepresearch.create(options);
+}
+
+/**
+ * Create M&A research using server API key (self-hosted mode)
+ * Phase 1: Gather financial data from Valyu Search
+ * Phase 2: Build enriched query and send to DeepResearch
+ */
+async function createMnAResearchWithApiKey(
+  targetCompany: string,
+  mode: ResearchMode,
+  dataCategories: MnADataCategory[],
+  dealContext?: string,
+  researchFocus?: string,
+  specificQuestions?: string,
+  files?: FileAttachment[],
+  urls?: string[],
+  alertEmail?: { email: string; custom_url: string }
+) {
+  const valyu = new Valyu(getValyuApiKey());
+
+  // Phase 1: Gather financial data
+  const financialContext = await gatherFinancialData(valyu, targetCompany, dataCategories);
+
+  // Phase 2: Build query, deliverables, and search config
+  const query = buildMnAQuery(targetCompany, financialContext, dealContext, researchFocus, specificQuestions);
+  const deliverables = buildMnADeliverables(targetCompany);
+  const searchConfig = buildMnASearchConfig(dataCategories);
+
+  const options: Record<string, unknown> = {
+    query,
+    deliverables,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any -- SDK types don't include "max" yet
+    mode: mode as any,
+    outputFormats: ["markdown", "pdf"],
+    search: searchConfig,
+  };
+
+  if (files && files.length > 0) options.files = files;
+  if (urls && urls.length > 0) options.urls = urls;
+  if (alertEmail) options.alertEmail = alertEmail;
+
+  return valyu.deepresearch.create(options);
+}
+
+/**
+ * Create M&A research using OAuth proxy (user's credits)
+ * Phase 1: Gather financial data using server API key (if available)
+ * Phase 2: Send enriched query via OAuth proxy
+ */
+async function createMnAResearchWithOAuth(
+  accessToken: string,
+  targetCompany: string,
+  mode: ResearchMode,
+  dataCategories: MnADataCategory[],
+  dealContext?: string,
+  researchFocus?: string,
+  specificQuestions?: string,
+  files?: FileAttachment[],
+  urls?: string[],
+  alertEmail?: { email: string; custom_url: string }
+) {
+  // Phase 1: Gather financial data using server API key if available
+  let financialContext;
+  const serverApiKey = process.env.VALYU_API_KEY;
+
+  if (!serverApiKey) {
+    console.warn("[OAuth M&A] No VALYU_API_KEY configured — skipping Phase 1 financial data gathering");
+    financialContext = emptyFinancialContext();
+  } else {
+    try {
+      const valyu = new Valyu(serverApiKey);
+      financialContext = await gatherFinancialData(valyu, targetCompany, dataCategories);
+    } catch (error) {
+      const message = error instanceof Error ? error.message : String(error);
+      console.error("[OAuth M&A] Phase 1 financial data gathering failed:", message);
+      financialContext = { ...emptyFinancialContext(), categoriesSearched: dataCategories.length };
+    }
+  }
+
+  // Phase 2: Build query, deliverables, and search config
+  const query = buildMnAQuery(targetCompany, financialContext, dealContext, researchFocus, specificQuestions);
+  const deliverables = buildMnADeliverables(targetCompany);
+  const searchConfig = buildMnASearchConfig(dataCategories);
+
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any -- proxy body varies by research type
+  const body: Record<string, any> = {
     query,
     deliverables,
     mode,
+    output_formats: ["markdown", "pdf"],
+    search: searchConfig,
+  };
+
+  if (files && files.length > 0) body.files = files;
+  if (urls && urls.length > 0) body.urls = urls;
+  if (alertEmail) body.alert_email = alertEmail;
+
+  return callOAuthProxy(accessToken, {
+    path: "/v1/deepresearch/tasks",
+    method: "POST",
+    body,
   });
 }
 
@@ -124,7 +262,24 @@ export async function POST(request: NextRequest) {
       clientContext,
       specificQuestions,
       researchMode,
-    } = await request.json();
+      dataCategories,
+      dealContext,
+      files,
+      urls,
+      alertEmail,
+    } = await request.json() as {
+      researchType: string;
+      researchSubject: string;
+      researchFocus?: string;
+      clientContext?: string;
+      specificQuestions?: string;
+      researchMode?: string;
+      dataCategories?: string[];
+      dealContext?: string;
+      files?: FileAttachment[];
+      urls?: string[];
+      alertEmail?: string;
+    };
 
     if (!researchSubject) {
       return NextResponse.json(
@@ -133,18 +288,27 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Build the research query based on type
-    const query = buildResearchQuery(
-      researchType,
-      researchSubject,
-      researchFocus,
-      clientContext,
-      specificQuestions
-    );
-
-    // Build deliverables based on research type
-    const deliverables = buildDeliverables(researchType, researchSubject);
     const mode = normalizeResearchMode(researchMode);
+
+    // Validate files and urls limits
+    if (files && files.length > 10) {
+      return NextResponse.json(
+        { error: "Maximum 10 files allowed" },
+        { status: 400 }
+      );
+    }
+    if (urls && urls.length > 10) {
+      return NextResponse.json(
+        { error: "Maximum 10 URLs allowed" },
+        { status: 400 }
+      );
+    }
+
+    // Build alert_email object with report URL pointing back to this app
+    const appOrigin = new URL(request.url).origin;
+    const alertEmailObj = alertEmail
+      ? { email: alertEmail, custom_url: `${appOrigin}/?research={id}` }
+      : undefined;
 
     // Check mode first
     const selfHosted = isSelfHostedMode();
@@ -159,13 +323,68 @@ export async function POST(request: NextRequest) {
 
     let response;
 
-    // Route based on mode
-    if (!selfHosted && accessToken) {
-      // Valyu mode: use OAuth proxy (charges user's credits)
-      response = await createResearchWithOAuth(accessToken, query, deliverables, mode);
+    if (researchType === "mna") {
+      // M&A due-diligence pipeline
+      const validCategorySet = new Set<string>(ALL_MNA_CATEGORIES);
+      const categories: MnADataCategory[] =
+        Array.isArray(dataCategories) && dataCategories.length > 0
+          ? dataCategories.filter((c: unknown): c is MnADataCategory =>
+              typeof c === "string" && validCategorySet.has(c)
+            )
+          : ALL_MNA_CATEGORIES;
+
+      if (categories.length === 0) {
+        return NextResponse.json(
+          { error: "No valid data categories selected" },
+          { status: 400 }
+        );
+      }
+
+      if (!selfHosted && accessToken) {
+        response = await createMnAResearchWithOAuth(
+          accessToken,
+          researchSubject,
+          mode,
+          categories,
+          dealContext,
+          researchFocus,
+          specificQuestions,
+          files,
+          urls,
+          alertEmailObj
+        );
+      } else {
+        response = await createMnAResearchWithApiKey(
+          researchSubject,
+          mode,
+          categories,
+          dealContext,
+          researchFocus,
+          specificQuestions,
+          files,
+          urls,
+          alertEmailObj
+        );
+      }
     } else {
-      // Self-hosted mode: use server API key
-      response = await createResearchWithApiKey(query, deliverables, mode);
+      // Standard research types: build query and deliverables
+      const query = buildResearchQuery(
+        researchType,
+        researchSubject,
+        researchFocus,
+        clientContext,
+        specificQuestions
+      );
+      const deliverables = buildDeliverables(researchType, researchSubject);
+
+      // Route based on mode
+      if (!selfHosted && accessToken) {
+        // Valyu mode: use OAuth proxy (charges user's credits)
+        response = await createResearchWithOAuth(accessToken, query, deliverables, mode, files, urls, alertEmailObj);
+      } else {
+        // Self-hosted mode: use server API key
+        response = await createResearchWithApiKey(query, deliverables, mode, files, urls, alertEmailObj);
+      }
     }
 
     return NextResponse.json({
@@ -200,7 +419,7 @@ export async function POST(request: NextRequest) {
 }
 
 function normalizeResearchMode(mode: unknown): ResearchMode {
-  if (mode === "fast" || mode === "standard" || mode === "heavy") {
+  if (mode === "fast" || mode === "standard" || mode === "heavy" || mode === "max") {
     return mode;
   }
   return "fast";

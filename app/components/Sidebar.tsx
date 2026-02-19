@@ -46,8 +46,9 @@ interface SidebarProps {
 
 const bottomItems = [
   { icon: BookOpen, label: "Documentation", href: "https://docs.valyu.ai/guides/deepresearch-quickstart" },
-  { icon: HelpCircle, label: "Join our Discord", href: "https://discord.com/invite/BhUWrFbHRa" },
+  { icon: HelpCircle, label: "Join our Discord", href: "https://discord.gg/cY4RhVcwZU" },
 ];
+
 
 export default function Sidebar({
   onSelectHistory,
@@ -78,14 +79,23 @@ export default function Sidebar({
 
   // Helper function to map API tasks to ResearchHistoryItem format
   const mapTasks = useCallback(
-    (tasks: { deepresearch_id: string; query: string; status: string; created_at: number }[]): ResearchHistoryItem[] =>
-      tasks.map((task) => ({
-        id: task.deepresearch_id,
-        title: task.query,
-        researchType: "custom",
-        createdAt: task.created_at ? task.created_at * 1000 : Date.now(),
-        status: task.status as ResearchHistoryItem["status"],
-      })),
+    (tasks: { deepresearch_id: string; query: string; title?: string; status: string; created_at: string | number }[]): ResearchHistoryItem[] =>
+      tasks.map((task) => {
+        let createdAt = Date.now();
+        if (task.created_at) {
+          const parsed = typeof task.created_at === "string"
+            ? new Date(task.created_at).getTime()
+            : task.created_at * 1000;
+          if (!isNaN(parsed)) createdAt = parsed;
+        }
+        return {
+          id: task.deepresearch_id,
+          title: task.title || task.query,
+          researchType: "custom",
+          createdAt,
+          status: task.status as ResearchHistoryItem["status"],
+        };
+      }),
     []
   );
 
@@ -437,68 +447,6 @@ export default function Sidebar({
         )}
       </div>
 
-      {/* Bottom Items */}
-      <div className="p-2 border-t border-border">
-        <div className="space-y-1">
-          {bottomItems.map((item, index) => {
-            const Icon = item.icon;
-            const isDocsLink = item.label === "Documentation";
-            return (
-              <a
-                key={index}
-                href={item.href}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="w-full flex items-center gap-3 p-3 rounded-lg hover:bg-surface-hover transition-colors text-text-muted text-left"
-                title={isCollapsed ? item.label : undefined}
-              >
-                <Icon className="w-5 h-5 flex-shrink-0" />
-                {!isCollapsed && (
-                  <>
-                    <span className="text-sm truncate">{item.label}</span>
-                    {isDocsLink && (
-                      <div className="flex items-center gap-1 bg-muted border border-border px-1.5 py-0.5 rounded text-xs text-muted-foreground ml-auto">
-                        <span>D</span>
-                      </div>
-                    )}
-                  </>
-                )}
-              </a>
-            );
-          })}
-          {/* Enterprise */}
-          {IS_ENTERPRISE && (
-            <button
-              onClick={() => setShowEnterpriseModal(true)}
-              className="w-full flex items-center gap-3 p-3 rounded-lg hover:bg-surface-hover transition-colors text-text-muted text-left"
-              title={isCollapsed ? "Enterprise Solutions" : undefined}
-            >
-              <Building2 className="w-5 h-5 flex-shrink-0" />
-              {!isCollapsed && (
-                <span className="text-sm truncate">Enterprise Solutions</span>
-              )}
-            </button>
-          )}
-          {/* Theme Toggle */}
-          <button
-            onClick={toggleTheme}
-            className="w-full flex items-center gap-3 p-3 rounded-lg hover:bg-surface-hover transition-colors text-text-muted text-left"
-            title={isCollapsed ? (theme === "light" ? "Switch to Dark Mode" : "Switch to Light Mode") : undefined}
-          >
-            {theme === "light" ? (
-              <Moon className="w-5 h-5 flex-shrink-0" />
-            ) : (
-              <Sun className="w-5 h-5 flex-shrink-0" />
-            )}
-            {!isCollapsed && (
-              <span className="text-sm truncate">
-                {theme === "light" ? "Dark Mode" : "Light Mode"}
-              </span>
-            )}
-          </button>
-        </div>
-      </div>
-
       {/* User Profile */}
       <div className="p-2 border-t border-border">
         {isAuthenticated && user ? (
@@ -751,27 +699,6 @@ export default function Sidebar({
       {/* Bottom Items */}
       <div className="p-2 border-t border-border">
         <div className="space-y-1">
-          {bottomItems.map((item, index) => {
-            const Icon = item.icon;
-            const isDocsLink = item.label === "Documentation";
-            return (
-              <a
-                key={index}
-                href={item.href}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="w-full flex items-center gap-3 p-3 rounded-lg hover:bg-surface-hover transition-colors text-text-muted text-left"
-              >
-                <Icon className="w-5 h-5 flex-shrink-0" />
-                <span className="text-sm truncate">{item.label}</span>
-                {isDocsLink && (
-                  <div className="flex items-center gap-1 bg-muted border border-border px-1.5 py-0.5 rounded text-xs text-muted-foreground ml-auto">
-                    <span>D</span>
-                  </div>
-                )}
-              </a>
-            );
-          })}
           {/* Enterprise */}
           {IS_ENTERPRISE && (
             <button
