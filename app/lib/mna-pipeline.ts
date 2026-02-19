@@ -119,7 +119,7 @@ export function buildMnAQuery(
 // 2. Build the deliverables list for the M&A DD report
 // ---------------------------------------------------------------------------
 
-interface MnADeliverable {
+export interface MnADeliverable {
   type: "xlsx" | "docx" | "pptx";
   title: string;
   description: string;
@@ -162,7 +162,7 @@ export function buildMnADeliverables(targetCompany: string): MnADeliverable[] {
 // 3. Build search configuration for DeepResearch based on selected categories
 // ---------------------------------------------------------------------------
 
-interface MnASearchConfig {
+export interface MnASearchConfig {
   searchType: "all";
   includedSources: string[];
 }
