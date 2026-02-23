@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import dynamic from "next/dynamic";
 import {
   CheckCircle,
@@ -21,6 +21,7 @@ import {
 } from "lucide-react";
 import { useAuthStore } from "@/app/stores/auth-store";
 import { FileIcon, defaultStyles } from "react-file-icon";
+import { marked } from "marked";
 import ResearchActivityFeed from "./ResearchActivityFeed";
 import MarkdownRenderer from "./MarkdownRenderer";
 
@@ -169,7 +170,68 @@ export default function ResearchResults({ result, onCancel, onReset, onFollowUp,
     }
   };
 
+  // Report save dropdown
+  const [showSaveMenu, setShowSaveMenu] = useState(false);
+  const saveMenuRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const handleClickOutside = (e: MouseEvent) => {
+      if (saveMenuRef.current && !saveMenuRef.current.contains(e.target as Node)) {
+        setShowSaveMenu(false);
+      }
+    };
+    if (showSaveMenu) document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, [showSaveMenu]);
+
   const reportContent = showReport && result?.output ? result.output : "";
+
+  const triggerDownload = (blob: Blob, filename: string) => {
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    window.URL.revokeObjectURL(url);
+  };
+
+  const handleSaveMarkdown = () => {
+    if (!result?.output) return;
+    triggerDownload(
+      new Blob([result.output], { type: "text/markdown;charset=utf-8" }),
+      "research-report.md"
+    );
+    setShowSaveMenu(false);
+  };
+
+  const handleSaveDocx = () => {
+    if (!result?.output) return;
+    const htmlBody = marked.parse(result.output, { gfm: true }) as string;
+    const doc = `<!DOCTYPE html>
+<html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:w="urn:schemas-microsoft-com:office:word" xmlns="http://www.w3.org/TR/REC-html40">
+<head><meta charset="utf-8">
+<style>
+  body { font-family: Calibri, sans-serif; font-size: 11pt; line-height: 1.6; color: #1a1a1a; }
+  h1 { font-size: 18pt; margin-top: 24pt; }
+  h2 { font-size: 14pt; margin-top: 18pt; }
+  h3 { font-size: 12pt; margin-top: 14pt; }
+  table { border-collapse: collapse; width: 100%; margin: 12pt 0; }
+  th, td { border: 1px solid #bbb; padding: 6px 10px; text-align: left; }
+  th { background-color: #f0f0f0; font-weight: bold; }
+  blockquote { border-left: 3px solid #ccc; margin: 10pt 0; padding: 6px 14px; color: #555; }
+  code { font-family: Consolas, monospace; background: #f5f5f5; padding: 2px 4px; font-size: 10pt; }
+  pre { background: #f5f5f5; padding: 10px; border-radius: 4px; overflow-x: auto; }
+  ul, ol { margin: 6pt 0; padding-left: 24pt; }
+</style>
+</head><body>\n${htmlBody}\n</body></html>`;
+    triggerDownload(
+      new Blob(["\ufeff" + doc], { type: "application/msword" }),
+      "research-report.doc"
+    );
+    setShowSaveMenu(false);
+  };
 
   if (!result) return null;
 
@@ -425,13 +487,42 @@ export default function ResearchResults({ result, onCancel, onReset, onFollowUp,
                   )}
                 </button>
                 {showReport && (
-                  <button
-                    onClick={() => setReportFullscreen(true)}
-                    className="p-1 rounded hover:bg-surface-hover transition-colors text-text-muted hover:text-foreground"
-                    title="Full screen"
-                  >
-                    <Maximize2 className="w-3.5 h-3.5" />
-                  </button>
+                  <>
+                    <div className="relative" ref={saveMenuRef}>
+                      <button
+                        onClick={() => setShowSaveMenu(!showSaveMenu)}
+                        className="p-1 rounded hover:bg-surface-hover transition-colors text-text-muted hover:text-foreground"
+                        title="Save report"
+                      >
+                        <Download className="w-3.5 h-3.5" />
+                      </button>
+                      {showSaveMenu && (
+                        <div className="absolute left-0 top-full mt-1 z-50 bg-surface border border-border rounded-lg shadow-lg py-1 min-w-[160px]">
+                          <button
+                            onClick={handleSaveDocx}
+                            className="w-full text-left px-3 py-2 text-sm hover:bg-surface-hover transition-colors flex items-center gap-2"
+                          >
+                            {getFileIcon("docx")}
+                            Word (.doc)
+                          </button>
+                          <button
+                            onClick={handleSaveMarkdown}
+                            className="w-full text-left px-3 py-2 text-sm hover:bg-surface-hover transition-colors flex items-center gap-2"
+                          >
+                            <Download className="w-4 h-4 text-text-muted" />
+                            Markdown (.md)
+                          </button>
+                        </div>
+                      )}
+                    </div>
+                    <button
+                      onClick={() => setReportFullscreen(true)}
+                      className="p-1 rounded hover:bg-surface-hover transition-colors text-text-muted hover:text-foreground"
+                      title="Full screen"
+                    >
+                      <Maximize2 className="w-3.5 h-3.5" />
+                    </button>
+                  </>
                 )}
               </div>
               {showReport && reportContent && (
@@ -463,12 +554,41 @@ export default function ResearchResults({ result, onCancel, onReset, onFollowUp,
                     <BookOpen className="w-5 h-5 text-primary" />
                     <h2 className="font-semibold">Full Report</h2>
                   </div>
-                  <button
-                    onClick={() => setReportFullscreen(false)}
-                    className="p-2 hover:bg-surface rounded-lg transition-colors"
-                  >
-                    <X className="w-5 h-5" />
-                  </button>
+                  <div className="flex items-center gap-1">
+                    <div className="relative" ref={saveMenuRef}>
+                      <button
+                        onClick={() => setShowSaveMenu(!showSaveMenu)}
+                        className="p-2 hover:bg-surface rounded-lg transition-colors text-text-muted hover:text-foreground"
+                        title="Save report"
+                      >
+                        <Download className="w-5 h-5" />
+                      </button>
+                      {showSaveMenu && (
+                        <div className="absolute right-0 top-full mt-1 z-50 bg-surface border border-border rounded-lg shadow-lg py-1 min-w-[160px]">
+                          <button
+                            onClick={handleSaveDocx}
+                            className="w-full text-left px-3 py-2 text-sm hover:bg-surface-hover transition-colors flex items-center gap-2"
+                          >
+                            {getFileIcon("docx")}
+                            Word (.doc)
+                          </button>
+                          <button
+                            onClick={handleSaveMarkdown}
+                            className="w-full text-left px-3 py-2 text-sm hover:bg-surface-hover transition-colors flex items-center gap-2"
+                          >
+                            <Download className="w-4 h-4 text-text-muted" />
+                            Markdown (.md)
+                          </button>
+                        </div>
+                      )}
+                    </div>
+                    <button
+                      onClick={() => setReportFullscreen(false)}
+                      className="p-2 hover:bg-surface rounded-lg transition-colors"
+                    >
+                      <X className="w-5 h-5" />
+                    </button>
+                  </div>
                 </div>
                 <div className="flex-1 overflow-y-auto overflow-x-auto">
                   <div
